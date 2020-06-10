@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"net/http"
+	"net/url"
 	"testing"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -20,11 +21,24 @@ func TestPostgresConnection(t *testing.T) {
 }
 
 func TestBasicRequestWithProxy(t *testing.T) {
-	res, err := http.Get("https://blog.fefe.de")
+	//creating the proxyURL
+	proxyURL, err := url.Parse("http://103.28.121.58:80")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res.StatusCode != 200 {
-		t.Fatal("Status code of response is ", res.StatusCode)
+
+	transport := &http.Transport{
+		Proxy: http.ProxyURL(proxyURL),
+	}
+	client := &http.Client{
+		Transport: transport,
+	}
+
+	response, err := client.Get("http://blog.fefe.de")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if response.StatusCode != 200 {
+		t.Fatal("Status code of response is ", response.StatusCode)
 	}
 }
