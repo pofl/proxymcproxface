@@ -20,6 +20,11 @@ func TestPostgresConnection(t *testing.T) {
 	}
 }
 
+var providers = []string{
+	"https://www.proxy-list.download/api/v1/get?type=http",
+	"https://api.proxyscrape.com/?request=displayproxies&proxytype=http",
+}
+
 func TestBasicRequestWithProxy(t *testing.T) {
 	//creating the proxyURL
 	proxyURL, err := url.Parse("http://103.28.121.58:80")
@@ -44,12 +49,12 @@ func TestBasicRequestWithProxy(t *testing.T) {
 }
 
 func TestRequestProxyList(t *testing.T) {
-	providers := []string{
-		"https://www.proxy-list.download/api/v1/get?type=http",
-		"https://api.proxyscrape.com/?request=displayproxies&proxytype=http",
-	}
 	for _, provider := range providers {
-		_, err := fetchProxyList(provider)
+		providerURL, err := url.Parse(provider)
+		if err != nil {
+			t.Fatal(err)
+		}
+		_, err = fetchProxyList(providerURL)
 		if err != nil {
 			t.Fatal(err)
 		}
