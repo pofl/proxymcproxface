@@ -2,10 +2,8 @@ package main
 
 import (
 	"database/sql"
-	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strings"
 	"testing"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -46,21 +44,14 @@ func TestBasicRequestWithProxy(t *testing.T) {
 }
 
 func TestRequestProxyList(t *testing.T) {
-	res, err := http.Get("https://www.proxy-list.download/api/v1/get?type=http")
-	if err != nil {
-		t.Fatal(err)
+	providers := []string{
+		"https://www.proxy-list.download/api/v1/get?type=http",
+		"https://api.proxyscrape.com/?request=displayproxies&proxytype=http",
 	}
-
-	data, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		t.Fatal(err)
+	for _, provider := range providers {
+		_, err := fetchProxyList(provider)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
-
-	proxyHosts := strings.Split(string(data), "\n")
-
-	if len(proxyHosts) <= 1 {
-		t.Fatal("Response from proxy list didn't contain proxies. Response was:\n", string(data))
-	}
-
-	t.Log(proxyHosts)
 }
