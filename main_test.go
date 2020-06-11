@@ -31,14 +31,22 @@ func TestBasicRequestWithProxy(t *testing.T) {
 		t.Fatal(err)
 	}
 	proxies, err := fetchProxyList(providerURL)
-	_ = proxies
-	proxyURL, err := url.Parse("http://" + proxies[5])
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = testProxy(proxyURL)
-	if err != nil {
-		t.Fatal(err)
+	foundAWorkingProxy := false
+	for _, proxy := range proxies {
+		proxyURL, err := url.Parse("http://" + proxy)
+		if err == nil {
+			err = testProxy(proxyURL)
+			if err == nil {
+				foundAWorkingProxy = true
+				break
+			}
+		}
+	}
+	if !foundAWorkingProxy {
+		t.Fatal("No working proxy found")
 	}
 }
 
