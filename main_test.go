@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"net/http"
 	"net/url"
 	"testing"
 
@@ -25,26 +24,21 @@ var providers = []string{
 	"https://api.proxyscrape.com/?request=displayproxies&proxytype=http",
 }
 
+// This test is very flaky. Proxies can stop working any time.
 func TestBasicRequestWithProxy(t *testing.T) {
-	//creating the proxyURL
-	proxyURL, err := url.Parse("http://103.28.121.58:80")
+	providerURL, err := url.Parse(providers[0])
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	transport := &http.Transport{
-		Proxy: http.ProxyURL(proxyURL),
-	}
-	client := &http.Client{
-		Transport: transport,
-	}
-
-	response, err := client.Get("http://blog.fefe.de")
+	proxies, err := fetchProxyList(providerURL)
+	_ = proxies
+	proxyURL, err := url.Parse("http://" + proxies[5])
 	if err != nil {
 		t.Fatal(err)
 	}
-	if response.StatusCode != 200 {
-		t.Fatal("Status code of response is ", response.StatusCode)
+	err = testProxy(proxyURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 

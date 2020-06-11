@@ -38,3 +38,22 @@ func fetchProxyList(url *url.URL) ([]string, error) {
 
 	return nil, fmt.Errorf("No idea how we got to this point in the code ...")
 }
+
+func testProxy(url *url.URL) error {
+	client := &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyURL(url),
+		},
+	}
+	response, err := client.Get("http://blog.fefe.de")
+	if err != nil {
+		return err
+	}
+	statusCode := response.StatusCode
+	if statusCode < 200 || statusCode >= 300 {
+		body := []byte{}
+		_, _ = response.Body.Read(body)
+		return fmt.Errorf("Status code of response is %d, body is %v", statusCode, body)
+	}
+	return nil
+}
