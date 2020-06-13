@@ -57,3 +57,28 @@ func testProxy(url *url.URL) error {
 	}
 	return nil
 }
+
+func testProxyURLList(urls []*url.URL) []*url.URL {
+	workingProxies := []*url.URL{}
+
+	for _, proxy := range urls {
+		err := testProxy(proxy)
+		if err == nil {
+			workingProxies = append(workingProxies, proxy)
+		}
+	}
+
+	return workingProxies
+}
+
+func testProxyHostPortList(hosts []string) []*url.URL {
+	urls := []*url.URL{}
+	for _, proxy := range hosts {
+		proxyURL, err := url.Parse("http://" + proxy)
+		if err == nil {
+			urls = append(urls, proxyURL)
+		}
+	}
+
+	return testProxyURLList(urls)
+}
