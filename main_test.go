@@ -8,15 +8,17 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
+func errorIsFatal(t *testing.T, err error) {
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestPostgresConnection(t *testing.T) {
 	client, err := sql.Open("pgx", "user=postgres password=test host=localhost")
-	if err != nil {
-		t.Fatal(err)
-	}
+	errorIsFatal(t, err)
 	err = client.Ping()
-	if err != nil {
-		t.Fatal(err)
-	}
+	errorIsFatal(t, err)
 }
 
 var providers = []string{
@@ -27,13 +29,9 @@ var providers = []string{
 // This test is very flaky. Proxies can stop working any time.
 func TestBasicRequestWithProxy(t *testing.T) {
 	providerURL, err := url.Parse(providers[0])
-	if err != nil {
-		t.Fatal(err)
-	}
+	errorIsFatal(t, err)
 	proxies, err := fetchProxyList(providerURL)
-	if err != nil {
-		t.Fatal(err)
-	}
+	errorIsFatal(t, err)
 	foundAWorkingProxy := false
 	for _, proxy := range proxies {
 		proxyURL, err := url.Parse("http://" + proxy)
@@ -53,12 +51,8 @@ func TestBasicRequestWithProxy(t *testing.T) {
 func TestRequestProxyList(t *testing.T) {
 	for _, provider := range providers {
 		providerURL, err := url.Parse(provider)
-		if err != nil {
-			t.Fatal(err)
-		}
+		errorIsFatal(t, err)
 		_, err = fetchProxyList(providerURL)
-		if err != nil {
-			t.Fatal(err)
-		}
+		errorIsFatal(t, err)
 	}
 }
