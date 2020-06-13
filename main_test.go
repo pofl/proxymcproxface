@@ -14,11 +14,18 @@ func errorIsFatal(t *testing.T, err error) {
 	}
 }
 
-func TestPostgresConnection(t *testing.T) {
+func withDB(t *testing.T, f func(*sql.DB)) error {
 	client, err := sql.Open("pgx", "user=postgres password=test host=localhost")
 	errorIsFatal(t, err)
-	err = client.Ping()
-	errorIsFatal(t, err)
+	f(client)
+	return nil
+}
+
+func TestPostgresConnection(t *testing.T) {
+	withDB(t, func(client *sql.DB) {
+		err := client.Ping()
+		errorIsFatal(t, err)
+	})
 }
 
 var providers = []string{
