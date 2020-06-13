@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"net"
 	"net/url"
 	"testing"
@@ -51,27 +52,39 @@ func TestDBInit(t *testing.T) {
 	})
 }
 
-// This test is very flaky. Proxies can stop working any time.
-func TestBasicRequestWithProxy(t *testing.T) {
+func getNWorkingProxies(n int) ([]net.Addr, error) {
 	providerURL := providers.list()[0]
 	proxies, err := fetchProxyList(providerURL)
-	require.NoError(t, err)
-	foundAWorkingProxy := false
+	if err != nil {
+		return nil, err
+	}
+	workingProxies := []net.Addr{}
 	for _, proxy := range proxies {
-		proxyURL, err := net.ResolveTCPAddr("tcp4", proxy)
-		require.NoError(t, err)
+		proxyAddr, err := net.ResolveTCPAddr("tcp4", proxy)
+		if err != nil {
+			return nil, err
+		}
 		testURL, _ := url.Parse("https://motherfuckingwebsite.com/")
 		if err == nil {
-			_, err = checkProxy(proxyURL, testURL)
+			_, err = checkProxy(proxyAddr, testURL)
 			if err == nil {
-				foundAWorkingProxy = true
-				break
+				workingProxies = append(workingProxies, proxyAddr)
+				if !(len(workingProxies) < n) {
+					break
+				}
 			}
 		}
 	}
-	if !foundAWorkingProxy {
-		t.Fatal("No working proxy found")
+	if len(workingProxies) != n {
+		return nil, fmt.Errorf("Not enough working proxies found")
 	}
+	return workingProxies, nil
+}
+
+// This test is very flaky. Proxies can stop working any time.
+func TestBasicRequestWithProxy(t *testing.T) {
+	_, err := getNWorkingProxies(1)
+	require.NoError(t, err)
 }
 
 func TestFetchProxyList(t *testing.T) {
