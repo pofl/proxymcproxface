@@ -1,12 +1,23 @@
 package main
 
-import "database/sql"
+import (
+	"database/sql"
 
-func main() {
+	_ "github.com/jackc/pgx/v4/stdlib"
+)
 
-}
+var db *sql.DB
+
+func main() {}
 
 func initDB(db *sql.DB) error {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS proxies (hostpost TEXT)")
+	ddl := `
+		CREATE TABLE IF NOT EXISTS proxy_check_results (
+			proxy   TEXT      NOT NULL,
+			testURL TEXT      NOT NULL,
+			ts      TIMESTAMP NOT NULL,
+			worked  BOOLEAN   NOT NULL
+		)`
+	_, err := db.Exec(ddl)
 	return err
 }

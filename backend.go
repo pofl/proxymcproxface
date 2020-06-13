@@ -3,16 +3,150 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
+
+	"github.com/spf13/viper"
 )
 
-func fetchProxyList(url *url.URL) ([]string, error) {
-	res, err := http.Get(url.String())
+var testURLs UrlList
+var providers UrlList
+
+func init() {
+	providers = UrlList{[]*url.URL{}}
+	for _, str := range []string{
+		"https://www.proxy-list.download/api/v1/get?type=http",
+		// "https://api.proxyscrape.com/?request=displayproxies&proxytype=http",
+	} {
+		_ = providers.addStr(str)
+	}
+
+	testURLs = UrlList{[]*url.URL{}}
+	for _, str := range []string{
+		"https://motherfuckingwebsite.com/",
+	} {
+		_ = testURLs.addStr(str)
+	}
+}
+
+type checkResult struct {
+	proxy   net.Addr
+	testURL *url.URL
+	ts      time.Time
+	worked  bool
+}
+
+func updateNow() error {
+	viper.SetDefault("proxies_take_first", 0)
+	limit := viper.GetInt("proxies_take_first")
+	for _, prov := range providers.list() {
+		list, err := fetchProxiesFromProvider(prov)
+		if err != nil {
+			log.Fatal(err)
+		}
+		var actualList []net.Addr
+		if limit > 0 {
+			actualList = list[:limit]
+		} else {
+			actualList = list
+		}
+		for _, proxy := range actualList {
+			for _, testURL := range testURLs.list() {
+				res, err := checkProxy(proxy, testURL)
+				if err != nil {
+					log.Print(err)
+				}
+				err = saveCheckToDB(res)
+				if err != nil {
+					log.Print(err)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func saveCheckToDB(res checkResult) error {
+	insertStmt :=
+		"INSERT INTO proxy_check_results(proxy, testURL, ts, worked) VALUES ($1, $2, $3, $4)"
+	log.Printf("%v | %v | %v | %v", res.proxy.String(), res.testURL.String(), res.ts, res.worked)
+	_, err := db.Exec(insertStmt, res.proxy.String(), res.testURL.String(), res.ts, res.worked)
+	return err
+}
+
+func checkProxy(proxy net.Addr, testURL *url.URL) (checkResult, error) {
+	res := checkResult{proxy, testURL, time.Now(), false}
+	proxyURL, err := url.Parse("http://" + proxy.String())
+	if err != nil {
+		return res, err
+	}
+	client := &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyURL(proxyURL),
+		},
+	}
+	response, err := client.Get(testURL.String())
+	defer response.Body.Close()
+	if err != nil {
+		return res, err
+	}
+	statusCode := response.StatusCode
+	if statusCode < 200 || statusCode >= 300 {
+		body := []byte{}
+		_, _ = response.Body.Read(body)
+		return res, fmt.Errorf("Status code of response is %d, body is %v", statusCode, body)
+	}
+	res.worked = true
+	return res, nil
+}
+
+func fetchProxiesFromProvider(prov *url.URL) ([]net.Addr, error) {
+	res := []net.Addr{}
+	list, err := fetchProxyList(prov)
 	if err != nil {
 		return nil, err
 	}
+	for _, i := range list {
+		addr, err := net.ResolveTCPAddr("tcp4", i)
+		if err == nil {
+			res = append(res, addr)
+		}
+	}
+	return res, nil
+}
+
+type UrlList struct{ urls []*url.URL }
+
+func (list *UrlList) clear() {
+	list.urls = []*url.URL{}
+}
+
+func (list UrlList) list() []*url.URL {
+	return list.urls
+}
+
+func (list *UrlList) add(url *url.URL) {
+	list.urls = append(list.urls, url)
+}
+
+func (list *UrlList) addStr(urlStr string) error {
+	url, err := url.Parse(urlStr)
+	if err == nil {
+		list.urls = append(list.urls, url)
+	}
+	return err
+}
+
+func fetchProxyList(provider *url.URL) ([]string, error) {
+	res, err := http.Get(provider.String())
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
 
 	bodyContent, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -37,48 +171,4 @@ func fetchProxyList(url *url.URL) ([]string, error) {
 	}
 
 	return nil, fmt.Errorf("No idea how we got to this point in the code ...")
-}
-
-func testProxy(url *url.URL) error {
-	client := &http.Client{
-		Transport: &http.Transport{
-			Proxy: http.ProxyURL(url),
-		},
-	}
-	response, err := client.Get("http://blog.fefe.de")
-	if err != nil {
-		return err
-	}
-	statusCode := response.StatusCode
-	if statusCode < 200 || statusCode >= 300 {
-		body := []byte{}
-		_, _ = response.Body.Read(body)
-		return fmt.Errorf("Status code of response is %d, body is %v", statusCode, body)
-	}
-	return nil
-}
-
-func testProxyURLList(urls []*url.URL) []*url.URL {
-	workingProxies := []*url.URL{}
-
-	for _, proxy := range urls {
-		err := testProxy(proxy)
-		if err == nil {
-			workingProxies = append(workingProxies, proxy)
-		}
-	}
-
-	return workingProxies
-}
-
-func testProxyHostPortList(hosts []string) []*url.URL {
-	urls := []*url.URL{}
-	for _, proxy := range hosts {
-		proxyURL, err := url.Parse("http://" + proxy)
-		if err == nil {
-			urls = append(urls, proxyURL)
-		}
-	}
-
-	return testProxyURLList(urls)
 }

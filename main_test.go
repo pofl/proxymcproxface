@@ -2,10 +2,11 @@ package main
 
 import (
 	"database/sql"
+	"net"
 	"net/url"
 	"testing"
 
-	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 )
 
@@ -43,28 +44,25 @@ func TestDBInit(t *testing.T) {
 		return tableCreatedSuccessfully
 	}
 	withDB(t, func(client *sql.DB) {
-		initDB(client)
-		success := tableExists(client, "proxies")
+		err := initDB(client)
+		require.NoError(t, err)
+		success := tableExists(client, "proxy_check_results")
 		require.True(t, success)
 	})
 }
 
-var providers = []string{
-	"https://www.proxy-list.download/api/v1/get?type=http",
-	"https://api.proxyscrape.com/?request=displayproxies&proxytype=http",
-}
-
 // This test is very flaky. Proxies can stop working any time.
 func TestBasicRequestWithProxy(t *testing.T) {
-	providerURL, err := url.Parse(providers[0])
-	require.NoError(t, err)
+	providerURL := providers.list()[0]
 	proxies, err := fetchProxyList(providerURL)
 	require.NoError(t, err)
 	foundAWorkingProxy := false
 	for _, proxy := range proxies {
-		proxyURL, err := url.Parse("http://" + proxy)
+		proxyURL, err := net.ResolveTCPAddr("tcp4", proxy)
+		require.NoError(t, err)
+		testURL, _ := url.Parse("https://motherfuckingwebsite.com/")
 		if err == nil {
-			err = testProxy(proxyURL)
+			_, err = checkProxy(proxyURL, testURL)
 			if err == nil {
 				foundAWorkingProxy = true
 				break
@@ -77,10 +75,18 @@ func TestBasicRequestWithProxy(t *testing.T) {
 }
 
 func TestFetchProxyList(t *testing.T) {
-	for _, provider := range providers {
-		providerURL, err := url.Parse(provider)
-		require.NoError(t, err)
-		_, err = fetchProxyList(providerURL)
+	for _, provider := range providers.list() {
+		_, err := fetchProxyList(provider)
 		require.NoError(t, err)
 	}
+}
+
+func TestUpdate(t *testing.T) {
+	viper.Set("proxies_take_first", 2)
+	client, err := sql.Open("pgx", "user=postgres password=test host=localhost")
+	require.NoError(t, err)
+	db = client
+	initDB(db)
+	err = updateNow()
+	require.NoError(t, err)
 }
