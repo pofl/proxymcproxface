@@ -2,13 +2,25 @@ package main
 
 import (
 	"database/sql"
+	"log"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
 var db *sql.DB
 
-func main() {}
+func main() {
+	err := connectDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = initDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	router := ginit()
+	router.Run("localhost:5000")
+}
 
 func connectDB() error {
 	client, err := sql.Open("pgx", "user=postgres password=test host=localhost")

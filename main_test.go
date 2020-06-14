@@ -90,3 +90,11 @@ func TestUpdate(t *testing.T) {
 	err := updateNow()
 	require.NoError(t, err)
 }
+
+func TestProxyList(t *testing.T) {
+	require.NoError(t, connectDB())
+	require.NoError(t, initDB())
+	list, err := getProxyList()
+	require.NoError(t, err)
+	require.NotEmpty(t, list)
+}

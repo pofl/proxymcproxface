@@ -172,3 +172,32 @@ func fetchProxyList(provider *url.URL) ([]string, error) {
 
 	return nil, fmt.Errorf("No idea how we got to this point in the code ...")
 }
+
+type ProxyListItem struct {
+	Proxy   string
+	TestURL string
+	TS      string
+	Worked  bool
+}
+
+func getProxyList() ([]ProxyListItem, error) {
+	rows, err := db.Query("SELECT * FROM proxy_check_results")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	res := []ProxyListItem{}
+	for rows.Next() {
+		item := ProxyListItem{}
+		// var proxy, testURL, ts string
+		// var worked bool
+		err = rows.Scan(&item.Proxy, &item.TestURL, &item.TS, &item.Worked)
+		if err != nil {
+			log.Fatal("Scan didn't work")
+		}
+		res = append(res, item)
+	}
+	err = rows.Err()
+	return res, err
+}
