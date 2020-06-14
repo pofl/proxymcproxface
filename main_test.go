@@ -11,18 +11,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func withDB(t *testing.T, f func(*sql.DB)) error {
-	client, err := sql.Open("pgx", "user=postgres password=test host=localhost")
-	require.NoError(t, err)
-	f(client)
-	return nil
-}
-
 func TestPostgresConnection(t *testing.T) {
-	withDB(t, func(client *sql.DB) {
-		err := client.Ping()
-		require.NoError(t, err)
-	})
+	require.NoError(t, connectDB())
+	require.NoError(t, db.Ping())
 }
 
 func TestDBInit(t *testing.T) {
@@ -44,12 +35,11 @@ func TestDBInit(t *testing.T) {
 		require.NoError(t, err)
 		return tableCreatedSuccessfully
 	}
-	withDB(t, func(client *sql.DB) {
-		err := initDB(client)
-		require.NoError(t, err)
-		success := tableExists(client, "proxy_check_results")
-		require.True(t, success)
-	})
+
+	require.NoError(t, connectDB())
+	require.NoError(t, initDB())
+	success := tableExists(db, "proxy_check_results")
+	require.True(t, success)
 }
 
 func getNWorkingProxies(n int) ([]net.Addr, error) {
@@ -96,10 +86,7 @@ func TestFetchProxyList(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	viper.Set("proxies_take_first", 2)
-	client, err := sql.Open("pgx", "user=postgres password=test host=localhost")
-	require.NoError(t, err)
-	db = client
-	initDB(db)
-	err = updateNow()
+	require.NoError(t, connectDB())
+	err := updateNow()
 	require.NoError(t, err)
 }

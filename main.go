@@ -10,7 +10,13 @@ var db *sql.DB
 
 func main() {}
 
-func initDB(db *sql.DB) error {
+func connectDB() error {
+	client, err := sql.Open("pgx", "user=postgres password=test host=localhost")
+	db = client
+	return err
+}
+
+func initDB() error {
 	ddl := `
 		CREATE TABLE IF NOT EXISTS proxy_check_results (
 			proxy   TEXT      NOT NULL,
