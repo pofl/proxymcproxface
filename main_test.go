@@ -5,11 +5,28 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"os"
 	"testing"
+	"time"
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 )
+
+var exampleCheckRes checkResult
+
+func TestMain(m *testing.M) {
+	proxy, _ := net.ResolveTCPAddr("tcp4", "1.2.3.4:5")
+	testURL, _ := url.Parse("https://motherfuckingwebsite.com/")
+	exampleCheckRes = checkResult{
+		proxy,
+		testURL,
+		time.Now(),
+		false,
+	}
+
+	os.Exit(m.Run())
+}
 
 func TestPostgresConnection(t *testing.T) {
 	require.NoError(t, connectDB())
@@ -94,7 +111,7 @@ func TestUpdate(t *testing.T) {
 func TestProxyList(t *testing.T) {
 	require.NoError(t, connectDB())
 	require.NoError(t, initDB())
-	list, err := getProxyList()
+	list, err := getProxyList(0)
 	require.NoError(t, err)
 	require.NotEmpty(t, list)
 }

@@ -180,8 +180,12 @@ type ProxyListItem struct {
 	Worked  bool
 }
 
-func getProxyList() ([]ProxyListItem, error) {
-	rows, err := db.Query("SELECT * FROM proxy_check_results")
+func getProxyList(limit int) ([]ProxyListItem, error) {
+	query := "SELECT * FROM proxy_check_results"
+	if limit > 0 {
+		query = query + fmt.Sprintf(" LIMIT %d", limit)
+	}
+	rows, err := db.Query(query)
 	if err != nil {
 		return nil, err
 	}
