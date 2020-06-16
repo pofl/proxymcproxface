@@ -150,16 +150,12 @@ func fetchProxiesFromProvider(prov *url.URL) ([]fetchResult, error) {
 
 type UrlList struct{ urls []*url.URL }
 
-func (list *UrlList) clear() {
-	list.urls = []*url.URL{}
+func (list *UrlList) overwrite(newList []*url.URL) {
+	list.urls = newList
 }
 
 func (list UrlList) list() []*url.URL {
 	return list.urls
-}
-
-func (list *UrlList) add(url *url.URL) {
-	list.urls = append(list.urls, url)
 }
 
 func (list *UrlList) addStr(urlStr string) error {
