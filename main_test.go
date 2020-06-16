@@ -115,3 +115,10 @@ func TestProxyList(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, list)
 }
+
+func TestFetch(t *testing.T) {
+	require.NoError(t, connectDB())
+	require.NoError(t, initDB())
+	err := fetchNow()
+	require.NoError(t, err)
+}

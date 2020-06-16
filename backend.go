@@ -40,6 +40,28 @@ type checkResult struct {
 	worked  bool
 }
 
+func saveFetchToDB(fetch fetchResult) error {
+	insertStmt := "INSERT INTO fetch_runs VALUES ($1, $2, $3)"
+	_, err := db.Exec(insertStmt, fetch.providerURL.String(), fetch.proxy.String(), fetch.ts)
+	return err
+}
+
+func fetchNow() error {
+	for _, prov := range providers.list() {
+		list, err := fetchProxiesFromProvider(prov)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, fetch := range list {
+			err := saveFetchToDB(fetch)
+			if err != nil {
+				log.Printf("Error during writing %+v to DB: %v", fetch, err)
+			}
+		}
+	}
+	return nil
+}
+
 func updateNow() error {
 	viper.SetDefault("proxies_take_first", 0)
 	limit := viper.GetInt("proxies_take_first")
