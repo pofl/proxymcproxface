@@ -18,19 +18,15 @@ var providers UrlList
 
 func init() {
 	providers = UrlList{[]*url.URL{}}
-	for _, str := range []string{
+	providers.overwrite([]string{
 		"https://www.proxy-list.download/api/v1/get?type=http",
 		// "https://api.proxyscrape.com/?request=displayproxies&proxytype=http",
-	} {
-		_ = providers.addStr(str)
-	}
+	})
 
 	testURLs = UrlList{[]*url.URL{}}
-	for _, str := range []string{
+	testURLs.overwrite([]string{
 		"https://motherfuckingwebsite.com/",
-	} {
-		_ = testURLs.addStr(str)
-	}
+	})
 }
 
 type checkResult struct {
@@ -149,20 +145,21 @@ func fetchProxiesFromProvider(prov *url.URL) ([]fetchResult, error) {
 
 type UrlList struct{ urls []*url.URL }
 
-func (list *UrlList) overwrite(newList []*url.URL) {
-	list.urls = newList
+func (list *UrlList) overwrite(newList []string) error {
+	newURLs := []*url.URL{}
+	for _, str := range newList {
+		url, err := url.Parse(str)
+		if err != nil {
+			return err
+		}
+		newURLs = append(newURLs, url)
+	}
+	list.urls = newURLs
+	return nil
 }
 
 func (list UrlList) list() []*url.URL {
 	return list.urls
-}
-
-func (list *UrlList) addStr(urlStr string) error {
-	url, err := url.Parse(urlStr)
-	if err == nil {
-		list.urls = append(list.urls, url)
-	}
-	return err
 }
 
 func fetchProxyList(provider *url.URL) ([]string, error) {
