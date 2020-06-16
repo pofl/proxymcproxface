@@ -15,6 +15,7 @@ import (
 func TestProxyListEndpoint(t *testing.T) {
 	require.NoError(t, connectDB())
 	require.NoError(t, initDB())
+	server := ginit()
 
 	// populate DB to have at least 2 records
 	_ = saveCheckToDB(exampleCheckRes)
@@ -23,10 +24,8 @@ func TestProxyListEndpoint(t *testing.T) {
 	err := saveCheckToDB(anotherEx)
 	require.NoError(t, err)
 
-	req, err := http.NewRequest("GET", "localhost:5000/proxies", nil)
-	require.NoError(t, err)
-	limitedReq, err := http.NewRequest("GET", "localhost:5000/proxies?limit=1", nil)
-	require.NoError(t, err)
+	req := httptest.NewRequest("GET", "/proxies", nil)
+	limitedReq := httptest.NewRequest("GET", "/proxies?limit=1", nil)
 
 	checkResponse := func(
 		name string, req *http.Request,
@@ -34,15 +33,13 @@ func TestProxyListEndpoint(t *testing.T) {
 	) {
 		t.Run(name, func(t *testing.T) {
 			rr := httptest.NewRecorder()
-			c, _ := gin.CreateTestContext(rr)
-			c.Request = req
-			proxyList(c)
+			server.ServeHTTP(rr, req)
 			f(rr)
 		})
 	}
 
 	checkResponse("Happy path", req, func(res *httptest.ResponseRecorder) {
-		require.Equal(t, 200, res.Result().StatusCode)
+		require.Equal(t, 200, res.Code)
 		var got []gin.H
 		err = json.Unmarshal(res.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -50,7 +47,7 @@ func TestProxyListEndpoint(t *testing.T) {
 	})
 
 	checkResponse("Happy path with limit", limitedReq, func(res *httptest.ResponseRecorder) {
-		require.Equal(t, 200, res.Result().StatusCode)
+		require.Equal(t, 200, res.Code)
 		var got []gin.H
 		err = json.Unmarshal(res.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -62,6 +59,6 @@ func TestProxyListEndpoint(t *testing.T) {
 	require.Error(t, client.Ping())
 	db = client
 	checkResponse("Sad path", req, func(res *httptest.ResponseRecorder) {
-		require.Equal(t, 500, res.Result().StatusCode)
+		require.Equal(t, 500, res.Code)
 	})
 }
