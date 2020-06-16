@@ -74,3 +74,16 @@ func TestFetchEndpoint(t *testing.T) {
 
 	require.Equal(t, http.StatusNoContent, rr.Code)
 }
+
+func TestCheckEndpoint(t *testing.T) {
+	require.NoError(t, connectDB())
+	require.NoError(t, initDB())
+	gin := ginit()
+
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest("POST", "/check", nil)
+	gin.ServeHTTP(rr, req)
+
+	require.Equal(t, http.StatusAccepted, rr.Code)
+
+}

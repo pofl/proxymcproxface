@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -11,6 +12,7 @@ func ginit() *gin.Engine {
 	r := gin.Default()
 	r.GET("/proxies", proxyList)
 	r.POST("/fetch", triggerFetch)
+	r.POST("/check", triggerCheck)
 	return r
 }
 
@@ -32,4 +34,14 @@ func proxyList(c *gin.Context) {
 func triggerFetch(c *gin.Context) {
 	fetchNow()
 	c.Status(http.StatusNoContent)
+}
+
+func triggerCheck(c *gin.Context) {
+	go func() {
+		err := checkAll()
+		if err != nil {
+			log.Printf("Error while checking all known proxies: %v", err)
+		}
+	}()
+	c.Status(http.StatusAccepted)
 }

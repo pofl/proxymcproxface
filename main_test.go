@@ -23,6 +23,8 @@ func TestMain(m *testing.M) {
 		testURL,
 		time.Now(),
 		false,
+		0,
+		"",
 	}
 
 	os.Exit(m.Run())
@@ -73,8 +75,8 @@ func getNWorkingProxies(n int) ([]net.Addr, error) {
 		}
 		testURL, _ := url.Parse("https://motherfuckingwebsite.com/")
 		if err == nil {
-			_, err = checkProxy(proxyAddr, testURL)
-			if err == nil {
+			res := checkProxy(proxyAddr, testURL)
+			if res.worked == true {
 				workingProxies = append(workingProxies, proxyAddr)
 				if !(len(workingProxies) < n) {
 					break

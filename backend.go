@@ -30,10 +30,12 @@ func init() {
 }
 
 type checkResult struct {
-	proxy   net.Addr
-	testURL *url.URL
-	ts      time.Time
-	worked  bool
+	proxy      net.Addr
+	testURL    *url.URL
+	ts         time.Time
+	worked     bool
+	statusCode int
+	errorMsg   string
 }
 
 func saveFetchToDB(fetch fetchResult) error {
@@ -73,10 +75,7 @@ func updateNow() error {
 		}
 		for _, fetch := range actualList {
 			for _, testURL := range testURLs.list() {
-				res, err := checkProxy(fetch.proxy, testURL)
-				if err != nil {
-					log.Print(err)
-				}
+				res := checkProxy(fetch.proxy, testURL)
 				err = saveCheckToDB(res)
 				if err != nil {
 					log.Print(err)
@@ -95,11 +94,13 @@ func saveCheckToDB(res checkResult) error {
 	return err
 }
 
-func checkProxy(proxy net.Addr, testURL *url.URL) (checkResult, error) {
-	res := checkResult{proxy, testURL, time.Now(), false}
+func checkProxy(proxy net.Addr, testURL *url.URL) checkResult {
+	res := checkResult{proxy, testURL, time.Now(), true, 0, ""}
 	proxyURL, err := url.Parse("http://" + proxy.String())
 	if err != nil {
-		return res, err
+		res.worked = false
+		res.errorMsg = err.Error()
+		return res
 	}
 	client := &http.Client{
 		Transport: &http.Transport{
@@ -107,18 +108,22 @@ func checkProxy(proxy net.Addr, testURL *url.URL) (checkResult, error) {
 		},
 	}
 	response, err := client.Get(testURL.String())
-	defer response.Body.Close()
 	if err != nil {
-		return res, err
+		res.worked = false
+		res.errorMsg = err.Error()
+		return res
 	}
+	defer response.Body.Close()
 	statusCode := response.StatusCode
 	if statusCode < 200 || statusCode >= 300 {
-		body := []byte{}
-		_, _ = response.Body.Read(body)
-		return res, fmt.Errorf("Status code of response is %d, body is %v", statusCode, body)
+		if body, err := ioutil.ReadAll(response.Body); err == nil {
+			res.errorMsg = string(body)
+		} else {
+			res.errorMsg = err.Error()
+		}
+		res.worked = false
 	}
-	res.worked = true
-	return res, nil
+	return res
 }
 
 type fetchResult struct {
