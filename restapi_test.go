@@ -62,3 +62,15 @@ func TestProxyListEndpoint(t *testing.T) {
 		require.Equal(t, 500, res.Code)
 	})
 }
+
+func TestFetchEndpoint(t *testing.T) {
+	require.NoError(t, connectDB())
+	require.NoError(t, initDB())
+	gin := ginit()
+
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest("POST", "/fetch", nil)
+	gin.ServeHTTP(rr, req)
+
+	require.Equal(t, http.StatusNoContent, rr.Code)
+}

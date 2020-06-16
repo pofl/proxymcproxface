@@ -10,6 +10,7 @@ import (
 func ginit() *gin.Engine {
 	r := gin.Default()
 	r.GET("/proxies", proxyList)
+	r.POST("/fetch", triggerFetch)
 	return r
 }
 
@@ -26,4 +27,9 @@ func proxyList(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, list)
+}
+
+func triggerFetch(c *gin.Context) {
+	fetchNow()
+	c.Status(http.StatusNoContent)
 }
