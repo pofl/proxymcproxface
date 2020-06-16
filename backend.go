@@ -48,15 +48,15 @@ func updateNow() error {
 		if err != nil {
 			log.Fatal(err)
 		}
-		var actualList []net.Addr
+		var actualList []fetchResult
 		if limit > 0 {
 			actualList = list[:limit]
 		} else {
 			actualList = list
 		}
-		for _, proxy := range actualList {
+		for _, fetch := range actualList {
 			for _, testURL := range testURLs.list() {
-				res, err := checkProxy(proxy, testURL)
+				res, err := checkProxy(fetch.proxy, testURL)
 				if err != nil {
 					log.Print(err)
 				}
@@ -104,16 +104,23 @@ func checkProxy(proxy net.Addr, testURL *url.URL) (checkResult, error) {
 	return res, nil
 }
 
-func fetchProxiesFromProvider(prov *url.URL) ([]net.Addr, error) {
-	res := []net.Addr{}
+type fetchResult struct {
+	providerURL *url.URL
+	proxy       net.Addr
+	ts          time.Time
+}
+
+func fetchProxiesFromProvider(prov *url.URL) ([]fetchResult, error) {
+	res := []fetchResult{}
 	list, err := fetchProxyList(prov)
 	if err != nil {
 		return nil, err
 	}
-	for _, i := range list {
-		addr, err := net.ResolveTCPAddr("tcp4", i)
+	for _, p := range list {
+		addr, err := net.ResolveTCPAddr("tcp4", p)
 		if err == nil {
-			res = append(res, addr)
+			fetch := fetchResult{prov, addr, time.Now()}
+			res = append(res, fetch)
 		}
 	}
 	return res, nil
