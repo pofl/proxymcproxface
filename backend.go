@@ -46,11 +46,11 @@ func saveFetchToDB(fetch fetchResult) error {
 	return err
 }
 
-func fetchNow() error {
+func fetchNow() {
 	for _, prov := range providers.list() {
 		list, err := fetchProxiesFromProvider(prov)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("can't fetch from %v, err: %v", prov, err)
 		}
 		for _, fetch := range list {
 			err := saveFetchToDB(fetch)
@@ -59,7 +59,6 @@ func fetchNow() error {
 			}
 		}
 	}
-	return nil
 }
 
 func updateNow() error {

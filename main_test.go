@@ -119,6 +119,15 @@ func TestProxyList(t *testing.T) {
 func TestFetch(t *testing.T) {
 	require.NoError(t, connectDB())
 	require.NoError(t, initDB())
-	err := fetchNow()
+
+	var cntBefore, cntAfter int
+	row := db.QueryRow("SELECT COUNT(*) FROM fetch_runs")
+	err := row.Scan(&cntBefore)
 	require.NoError(t, err)
+
+	fetchNow()
+
+	err = row.Scan(&cntAfter)
+	require.NoError(t, err)
+	require.Greater(t, cntAfter, cntBefore)
 }
