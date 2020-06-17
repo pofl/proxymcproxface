@@ -40,8 +40,7 @@ CREATE OR REPLACE VIEW proxy_details AS (
 CREATE OR REPLACE VIEW provider_details AS (
     SELECT
         provider_url, -- base address (URL) of the proxy list
-        MAX(ts) AS last_update, -- date of the last successful update of the proxy list
-        COUNT(proxy) AS last_count -- date of the last attempt to update with the number of records found
+        MAX(ts) AS last_update -- date of the last successful update of the proxy list
     FROM fetch_runs
     GROUP BY provider_url
 );
