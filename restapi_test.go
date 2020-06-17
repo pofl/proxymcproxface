@@ -68,11 +68,22 @@ func TestFetchEndpoint(t *testing.T) {
 	require.NoError(t, initDB())
 	gin := ginit()
 
+	cntQuery := "SELECT COUNT(*) FROM fetch_runs"
+	var cntBefore int
+	row := db.QueryRow(cntQuery)
+	err := row.Scan(&cntBefore)
+	require.NoError(t, err)
+
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/fetch", nil)
 	gin.ServeHTTP(rr, req)
-
 	require.Equal(t, http.StatusNoContent, rr.Code)
+
+	var cntAfter int
+	row = db.QueryRow(cntQuery)
+	err = row.Scan(&cntAfter)
+	require.NoError(t, err)
+	require.Greater(t, cntAfter, cntBefore)
 }
 
 func TestCheckEndpoint(t *testing.T) {
