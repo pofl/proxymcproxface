@@ -38,8 +38,14 @@ func triggerFetch(c *gin.Context) {
 }
 
 func triggerCheck(c *gin.Context) {
+	limitStr := c.DefaultQuery("limit", "-1")
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
 	go func() {
-		err := checkAll()
+		err := checkAll(limit)
 		if err != nil {
 			log.Printf("Error while checking all known proxies: %v", err)
 		}

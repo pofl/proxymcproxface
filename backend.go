@@ -121,16 +121,22 @@ func retrieveDistinctProxies() ([]net.Addr, error) {
 	return proxyList, rows.Err()
 }
 
-func checkAll() error {
+// limit < 0 means go all the way
+func checkAll(limit int) error {
 	checkOne := func(proxy net.Addr, testURL *url.URL) {
 		checkRes := checkProxy(proxy, testURL)
 		_ = saveCheckToDB(checkRes) // just drop it if it can't be saved
 	}
 
 	checkLoop := func(proxies []net.Addr) {
+		cnt := 0
 		for _, proxy := range proxies {
 			for _, testURL := range testURLs.list() {
 				go checkOne(proxy, testURL)
+				cnt++
+				if limit >= 0 && cnt >= limit {
+					return
+				}
 				time.Sleep(1 * time.Second)
 			}
 		}

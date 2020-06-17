@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
@@ -79,10 +80,21 @@ func TestCheckEndpoint(t *testing.T) {
 	require.NoError(t, initDB())
 	gin := ginit()
 
+	cntQuery := "SELECT COUNT(*) FROM checks"
+	var cntBefore int
+	row := db.QueryRow(cntQuery)
+	err := row.Scan(&cntBefore)
+	require.NoError(t, err)
+
 	rr := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/check", nil)
+	req := httptest.NewRequest("POST", "/check?limit=4", nil)
 	gin.ServeHTTP(rr, req)
-
 	require.Equal(t, http.StatusAccepted, rr.Code)
+	time.Sleep(10 * time.Second)
 
+	var cntAfter int
+	row = db.QueryRow(cntQuery)
+	err = row.Scan(&cntAfter)
+	require.NoError(t, err)
+	require.Greater(t, cntAfter, cntBefore)
 }
