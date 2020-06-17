@@ -75,6 +75,12 @@ func TestFetchEndpoint(t *testing.T) {
 	require.Equal(t, http.StatusNoContent, rr.Code)
 }
 
+func truncateFetchRuns() error {
+	sql := "TRUNCATE TABLE fetch_runs"
+	_, err := db.Exec(sql)
+	return err
+}
+
 func TestCheckEndpoint(t *testing.T) {
 	require.NoError(t, connectDB())
 	require.NoError(t, initDB())

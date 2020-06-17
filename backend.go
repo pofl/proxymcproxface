@@ -94,6 +94,37 @@ func saveCheckToDB(res checkResult) error {
 	return err
 }
 
+func retrieveDistinctProxies() ([]net.Addr, error) {
+	getProxyList := "SELECT DISTINCT proxy FROM fetch_runs"
+	rows, err := db.Query(getProxyList)
+	if err != nil {
+		log.Fatal(err)
+	}
+	proxyList := []net.Addr{}
+	for rows.Next() {
+		var proxy string
+		rows.Scan(&proxy)
+		parsed, err := net.ResolveTCPAddr("tcp4", proxy)
+		if err != nil {
+			log.Fatal(
+				"got an invalid proxy address from the DB although that should be impossible")
+		}
+		proxyList = append(proxyList, parsed)
+	}
+	return proxyList, rows.Err()
+}
+
+func checkAll() error {
+	proxies, err := retrieveDistinctProxies()
+	for _, proxy := range proxies {
+		for _, testURL := range testURLs.list() {
+			checkRes := checkProxy(proxy, testURL)
+			_ = saveCheckToDB(checkRes) // just drop it if it can't be saved
+		}
+	}
+	return err
+}
+
 func checkProxy(proxy net.Addr, testURL *url.URL) checkResult {
 	res := checkResult{proxy, testURL, time.Now(), true, 0, ""}
 	proxyURL, err := url.Parse("http://" + proxy.String())
