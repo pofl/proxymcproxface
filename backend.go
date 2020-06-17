@@ -210,9 +210,13 @@ func (list *UrlList) overwrite(newList []string) error {
 		if err != nil {
 			return err
 		}
+		if url.Hostname() == "" {
+			return fmt.Errorf("%s is not a URL", str)
+		}
 		newURLs = append(newURLs, url)
 	}
 	list.urls = newURLs
+	log.Print(newURLs)
 	return nil
 }
 

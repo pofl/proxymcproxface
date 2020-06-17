@@ -12,6 +12,7 @@ func ginit() *gin.Engine {
 	r := gin.Default()
 	r.GET("/proxies", proxyList)
 	r.GET("/providers", listProviderDetails)
+	r.POST("/providers", setProviders)
 	r.POST("/fetch", triggerFetch)
 	r.POST("/check", triggerCheck)
 	r.POST("/clear", clearDB)
@@ -70,4 +71,17 @@ func listProviderDetails(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, list)
+}
+
+func setProviders(c *gin.Context) {
+	var list []string
+	if err := c.BindJSON(&list); err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := providers.overwrite(list); err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+	c.Status(http.StatusNoContent)
 }
