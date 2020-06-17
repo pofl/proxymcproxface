@@ -2,7 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
+	"io/ioutil"
 	"log"
+	"strings"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
@@ -29,13 +32,23 @@ func connectDB() error {
 }
 
 func initDB() error {
-	ddl := `
-		CREATE TABLE IF NOT EXISTS proxy_check_results (
-			proxy   TEXT      NOT NULL,
-			testURL TEXT      NOT NULL,
-			ts      TIMESTAMP NOT NULL,
-			worked  BOOLEAN   NOT NULL
-		)`
-	_, err := db.Exec(ddl)
-	return err
+	return execSQLFile("schema.sql")
+}
+
+func execSQLFile(path string) error {
+	file, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	queries := strings.Split(string(file), ";")
+
+	for _, query := range queries {
+		log.Print("executing query ", query)
+		_, err := db.Exec(query)
+		if err != nil {
+			return fmt.Errorf("error {%w} during execution of query {%s}", err, query)
+		}
+	}
+	return nil
 }

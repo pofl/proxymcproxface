@@ -1,9 +1,9 @@
-CREATE TABLE fetch_runs (
+CREATE TABLE IF NOT EXISTS fetch_runs (
     provider_url TEXT,
     proxy TEXT,
     ts TIMESTAMP
 );
-CREATE TABLE checks (
+CREATE TABLE IF NOT EXISTS checks (
     proxy TEXT,
     test_url TEXT,
     ts TIMESTAMP NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE checks (
     status_code INTEGER,
     error_msg TEXT
 );
-CREATE VIEW proxy_details AS (
+CREATE OR REPLACE VIEW proxy_details AS (
     WITH check_stats AS (
         SELECT
             proxy,
@@ -37,7 +37,7 @@ CREATE VIEW proxy_details AS (
     JOIN fetch_stats AS f
     ON c.proxy = f.proxy
 );
-CREATE VIEW provider_details AS (
+CREATE OR REPLACE VIEW provider_details AS (
     SELECT
         provider_url, -- base address (URL) of the proxy list
         MAX(ts) AS last_update, -- date of the last successful update of the proxy list

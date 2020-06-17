@@ -57,8 +57,8 @@ func TestDBInit(t *testing.T) {
 
 	require.NoError(t, connectDB())
 	require.NoError(t, initDB())
-	success := tableExists(db, "proxy_check_results")
-	require.True(t, success)
+	require.True(t, tableExists(db, "checks"))
+	require.True(t, tableExists(db, "fetch_runs"))
 }
 
 func getNWorkingProxies(n int) ([]net.Addr, error) {
