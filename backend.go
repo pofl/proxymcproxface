@@ -88,9 +88,15 @@ func updateNow() error {
 
 func saveCheckToDB(res checkResult) error {
 	insertStmt :=
-		"INSERT INTO proxy_check_results(proxy, testURL, ts, worked) VALUES ($1, $2, $3, $4)"
-	log.Printf("%v | %v | %v | %v", res.proxy.String(), res.testURL.String(), res.ts, res.worked)
-	_, err := db.Exec(insertStmt, res.proxy.String(), res.testURL.String(), res.ts, res.worked)
+		"INSERT INTO checks VALUES ($1, $2, $3, $4, $5, $6)"
+	log.Printf(
+		"%v | %v | %v | %v | %v | %v",
+		res.proxy.String(), res.testURL.String(), res.ts, res.worked, res.statusCode, res.errorMsg,
+	)
+	_, err := db.Exec(
+		insertStmt,
+		res.proxy.String(), res.testURL.String(), res.ts, res.worked, res.statusCode, res.errorMsg,
+	)
 	return err
 }
 
