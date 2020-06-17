@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
@@ -18,20 +17,20 @@ func TestProxyListEndpoint(t *testing.T) {
 	server := ginit()
 
 	// populate DB to have at least 2 records
-	_ = saveCheckToDB(exampleCheckRes)
-	anotherEx := exampleCheckRes
-	anotherEx.ts = time.Now()
-	err := saveCheckToDB(anotherEx)
+	_ = saveFetchToDB(exampleFetchRes1)
+	_ = saveFetchToDB(exampleFetchRes2)
+	_ = saveCheckToDB(exampleCheckRes1)
+	err := saveCheckToDB(exampleCheckRes2)
 	require.NoError(t, err)
 
 	req := httptest.NewRequest("GET", "/proxies", nil)
 	limitedReq := httptest.NewRequest("GET", "/proxies?limit=1", nil)
 
 	checkResponse := func(
-		name string, req *http.Request,
+		testCaseName string, req *http.Request,
 		f func(res *httptest.ResponseRecorder),
 	) {
-		t.Run(name, func(t *testing.T) {
+		t.Run(testCaseName, func(t *testing.T) {
 			rr := httptest.NewRecorder()
 			server.ServeHTTP(rr, req)
 			f(rr)

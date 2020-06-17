@@ -13,19 +13,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var exampleCheckRes checkResult
+var exampleCheckRes1 checkResult
+var exampleCheckRes2 checkResult
+var exampleFetchRes1 fetchResult
+var exampleFetchRes2 fetchResult
 
 func TestMain(m *testing.M) {
-	proxy, _ := net.ResolveTCPAddr("tcp4", "1.2.3.4:5")
+	proxy1, _ := net.ResolveTCPAddr("tcp4", "1.2.3.4:5")
+	proxy2, _ := net.ResolveTCPAddr("tcp4", "5.6.7.8:9")
 	testURL, _ := url.Parse("https://motherfuckingwebsite.com/")
-	exampleCheckRes = checkResult{
-		proxy,
-		testURL,
-		time.Now(),
-		false,
-		0,
-		"",
-	}
+	exampleCheckRes1 = checkResult{proxy1, testURL, time.Now(), true, 0, ""}
+	exampleCheckRes2 = checkResult{proxy2, testURL, time.Now(), true, 0, ""}
+	exampleFetchRes1 = fetchResult{testURL, proxy1, time.Now()}
+	exampleFetchRes2 = fetchResult{testURL, proxy2, time.Now()}
 
 	os.Exit(m.Run())
 }

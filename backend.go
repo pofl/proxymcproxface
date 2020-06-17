@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -241,14 +242,14 @@ func fetchProxyList(provider *url.URL) ([]string, error) {
 }
 
 type ProxyListItem struct {
-	Proxy   string
-	TestURL string
-	TS      string
-	Worked  bool
+	Proxy       string
+	LastSuccess time.Time
+	LastSeen    time.Time
+	FirstSeen   time.Time
 }
 
 func getProxyList(limit int) ([]ProxyListItem, error) {
-	query := "SELECT * FROM proxy_check_results"
+	query := "SELECT * FROM proxy_details"
 	if limit > 0 {
 		query = query + fmt.Sprintf(" LIMIT %d", limit)
 	}
@@ -261,11 +262,9 @@ func getProxyList(limit int) ([]ProxyListItem, error) {
 	res := []ProxyListItem{}
 	for rows.Next() {
 		item := ProxyListItem{}
-		// var proxy, testURL, ts string
-		// var worked bool
-		err = rows.Scan(&item.Proxy, &item.TestURL, &item.TS, &item.Worked)
+		err = rows.Scan(&item.Proxy, &item.LastSuccess, &item.LastSeen, &item.FirstSeen)
 		if err != nil {
-			log.Fatal("Scan didn't work")
+			return res, errors.New("Scan didn't work")
 		}
 		res = append(res, item)
 	}
