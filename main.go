@@ -52,3 +52,11 @@ func execSQLFile(path string) error {
 	}
 	return nil
 }
+
+func truncateTables() error {
+	if _, err := db.Exec("TRUNCATE TABLE fetch_runs"); err != nil {
+		return err
+	}
+	_, err := db.Exec("TRUNCATE TABLE checks")
+	return err
+}

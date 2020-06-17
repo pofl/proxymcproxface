@@ -13,6 +13,7 @@ func ginit() *gin.Engine {
 	r.GET("/proxies", proxyList)
 	r.POST("/fetch", triggerFetch)
 	r.POST("/check", triggerCheck)
+	r.POST("/clear", clearDB)
 	return r
 }
 
@@ -44,4 +45,13 @@ func triggerCheck(c *gin.Context) {
 		}
 	}()
 	c.Status(http.StatusAccepted)
+}
+
+func clearDB(c *gin.Context) {
+	err := truncateTables()
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+	c.String(http.StatusOK, "DB cleared", nil)
 }
