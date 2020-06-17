@@ -127,12 +127,17 @@ func checkAll() error {
 		_ = saveCheckToDB(checkRes) // just drop it if it can't be saved
 	}
 
-	proxies, err := retrieveDistinctProxies()
-	for _, proxy := range proxies {
-		for _, testURL := range testURLs.list() {
-			go checkOne(proxy, testURL)
+	checkLoop := func(proxies []net.Addr) {
+		for _, proxy := range proxies {
+			for _, testURL := range testURLs.list() {
+				go checkOne(proxy, testURL)
+				time.Sleep(1 * time.Second)
+			}
 		}
 	}
+
+	proxies, err := retrieveDistinctProxies()
+	go checkLoop(proxies)
 	return err
 }
 
