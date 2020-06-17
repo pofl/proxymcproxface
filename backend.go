@@ -121,11 +121,15 @@ func retrieveDistinctProxies() ([]net.Addr, error) {
 }
 
 func checkAll() error {
+	checkOne := func(proxy net.Addr, testURL *url.URL) {
+		checkRes := checkProxy(proxy, testURL)
+		_ = saveCheckToDB(checkRes) // just drop it if it can't be saved
+	}
+
 	proxies, err := retrieveDistinctProxies()
 	for _, proxy := range proxies {
 		for _, testURL := range testURLs.list() {
-			checkRes := checkProxy(proxy, testURL)
-			_ = saveCheckToDB(checkRes) // just drop it if it can't be saved
+			go checkOne(proxy, testURL)
 		}
 	}
 	return err
