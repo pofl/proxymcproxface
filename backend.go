@@ -282,3 +282,26 @@ func getProxyList(limit int) ([]ProxyListItem, error) {
 	err = rows.Err()
 	return res, err
 }
+
+type ProviderDetails struct {
+	Provider   string
+	LastUpdate time.Time
+}
+
+func listProviders() ([]ProviderDetails, error) {
+	res := []ProviderDetails{}
+	rows, err := db.Query("SELECT * FROM provider_details")
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var prov ProviderDetails
+		err := rows.Scan(&prov.Provider, &prov.LastUpdate)
+		if err != nil {
+			// there really shouldn't be an error here so make it very visible if there ever is
+			log.Fatal(err)
+		}
+		res = append(res, prov)
+	}
+	return res, rows.Err()
+}

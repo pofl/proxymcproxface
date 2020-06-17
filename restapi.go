@@ -11,6 +11,7 @@ import (
 func ginit() *gin.Engine {
 	r := gin.Default()
 	r.GET("/proxies", proxyList)
+	r.GET("/providers", listProviderDetails)
 	r.POST("/fetch", triggerFetch)
 	r.POST("/check", triggerCheck)
 	r.POST("/clear", clearDB)
@@ -60,4 +61,13 @@ func clearDB(c *gin.Context) {
 		return
 	}
 	c.String(http.StatusOK, "DB cleared", nil)
+}
+
+func listProviderDetails(c *gin.Context) {
+	list, err := listProviders()
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, list)
 }

@@ -109,3 +109,26 @@ func TestCheckEndpoint(t *testing.T) {
 	require.NoError(t, err)
 	require.Greater(t, cntAfter, cntBefore)
 }
+
+func TestProviderDetails(t *testing.T) {
+	require.NoError(t, connectDB())
+	require.NoError(t, initDB())
+	server := ginit()
+
+	// populate DB to have at least 2 records
+	_ = saveFetchToDB(exampleFetchRes1)
+	_ = saveFetchToDB(exampleFetchRes2)
+	_ = saveCheckToDB(exampleCheckRes1)
+	err := saveCheckToDB(exampleCheckRes2)
+	require.NoError(t, err)
+
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/providers", nil)
+	server.ServeHTTP(rr, req)
+	require.Equal(t, http.StatusOK, rr.Code)
+
+	var got []gin.H
+	err = json.Unmarshal(rr.Body.Bytes(), &got)
+	require.NoError(t, err)
+	require.Greater(t, len(got), 0)
+}
