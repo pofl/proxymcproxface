@@ -136,10 +136,9 @@ func checkAll() error {
 }
 
 func checkProxy(proxy net.Addr, testURL *url.URL) checkResult {
-	res := checkResult{proxy, testURL, time.Now(), true, 0, ""}
+	res := checkResult{proxy, testURL, time.Now(), false, 0, ""}
 	proxyURL, err := url.Parse("http://" + proxy.String())
 	if err != nil {
-		res.worked = false
 		res.errorMsg = err.Error()
 		return res
 	}
@@ -150,19 +149,20 @@ func checkProxy(proxy net.Addr, testURL *url.URL) checkResult {
 	}
 	response, err := client.Get(testURL.String())
 	if err != nil {
-		res.worked = false
 		res.errorMsg = err.Error()
 		return res
 	}
 	defer response.Body.Close()
 	statusCode := response.StatusCode
-	if statusCode < 200 || statusCode >= 300 {
+	if statusCode >= 200 && statusCode < 300 {
+		res.worked = true
+	} else {
+		res.worked = false
 		if body, err := ioutil.ReadAll(response.Body); err == nil {
 			res.errorMsg = string(body)
 		} else {
 			res.errorMsg = err.Error()
 		}
-		res.worked = false
 	}
 	return res
 }
