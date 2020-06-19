@@ -28,7 +28,7 @@ func init() {
 	})
 }
 
-type checkResult struct {
+type CheckResult struct {
 	proxy      net.Addr
 	testURL    *url.URL
 	ts         time.Time
@@ -58,7 +58,7 @@ func fetchNow() {
 	}
 }
 
-func saveCheckToDB(res checkResult) error {
+func saveCheckToDB(res CheckResult) error {
 	insertStmt :=
 		"INSERT INTO checks VALUES ($1, $2, $3, $4, $5, $6)"
 	log.Printf(
@@ -118,8 +118,8 @@ func checkAll(limit int) error {
 	return err
 }
 
-func checkProxy(proxy net.Addr, testURL *url.URL) checkResult {
-	res := checkResult{proxy, testURL, time.Now(), false, 0, ""}
+func checkProxy(proxy net.Addr, testURL *url.URL) CheckResult {
+	res := CheckResult{proxy, testURL, time.Now(), false, 0, ""}
 	proxyURL, err := url.Parse("http://" + proxy.String())
 	if err != nil {
 		res.errorMsg = err.Error()

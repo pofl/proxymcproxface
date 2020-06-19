@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var exampleCheckRes1 checkResult
-var exampleCheckRes2 checkResult
+var exampleCheckRes1 CheckResult
+var exampleCheckRes2 CheckResult
 var exampleFetchRes1 FetchResult
 var exampleFetchRes2 FetchResult
 
@@ -21,8 +21,8 @@ func TestMain(m *testing.M) {
 	proxy1, _ := net.ResolveTCPAddr("tcp4", "1.2.3.4:5")
 	proxy2, _ := net.ResolveTCPAddr("tcp4", "5.6.7.8:9")
 	testURL, _ := url.Parse("https://motherfuckingwebsite.com/")
-	exampleCheckRes1 = checkResult{proxy1, testURL, time.Now(), true, 0, ""}
-	exampleCheckRes2 = checkResult{proxy2, testURL, time.Now(), true, 0, ""}
+	exampleCheckRes1 = CheckResult{proxy1, testURL, time.Now(), true, 0, ""}
+	exampleCheckRes2 = CheckResult{proxy2, testURL, time.Now(), true, 0, ""}
 	exampleFetchRes1 = FetchResult{testURL, proxy1, time.Now()}
 	exampleFetchRes2 = FetchResult{testURL, proxy2, time.Now()}
 
@@ -89,7 +89,6 @@ func getNWorkingProxies(n int) ([]net.Addr, error) {
 	return workingProxies, nil
 }
 
-// This test is very flaky. Proxies can stop working any time.
 func TestBasicRequestWithProxy(t *testing.T) {
 	_, err := getNWorkingProxies(1)
 	require.NoError(t, err)
