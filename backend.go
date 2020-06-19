@@ -37,61 +37,6 @@ type CheckResult struct {
 	errorMsg   string
 }
 
-func saveFetchToDB(fetch FetchResult) error {
-	insertStmt := "INSERT INTO fetch_runs VALUES ($1, $2, $3)"
-	_, err := db.Exec(insertStmt, fetch.providerURL.String(), fetch.proxy.String(), fetch.ts)
-	return err
-}
-
-func fetchNow() {
-	for _, prov := range providers.list() {
-		list, err := fetchProxiesFromProvider(prov)
-		if err != nil {
-			log.Printf("can't fetch from %v, err: %v", prov, err)
-		}
-		for _, fetch := range list {
-			err := saveFetchToDB(fetch)
-			if err != nil {
-				log.Printf("Error during writing %+v to DB: %v", fetch, err)
-			}
-		}
-	}
-}
-
-func saveCheckToDB(res CheckResult) error {
-	insertStmt :=
-		"INSERT INTO checks VALUES ($1, $2, $3, $4, $5, $6)"
-	log.Printf(
-		"%v | %v | %v | %v | %v | %v",
-		res.proxy.String(), res.testURL.String(), res.ts, res.worked, res.statusCode, res.errorMsg,
-	)
-	_, err := db.Exec(
-		insertStmt,
-		res.proxy.String(), res.testURL.String(), res.ts, res.worked, res.statusCode, res.errorMsg,
-	)
-	return err
-}
-
-func retrieveDistinctProxies() ([]net.Addr, error) {
-	getProxyList := "SELECT DISTINCT proxy FROM fetch_runs"
-	rows, err := db.Query(getProxyList)
-	if err != nil {
-		log.Fatal(err)
-	}
-	proxyList := []net.Addr{}
-	for rows.Next() {
-		var proxy string
-		rows.Scan(&proxy)
-		parsed, err := net.ResolveTCPAddr("tcp4", proxy)
-		if err != nil {
-			log.Fatal(
-				"got an invalid proxy address from the DB although that should be impossible")
-		}
-		proxyList = append(proxyList, parsed)
-	}
-	return proxyList, rows.Err()
-}
-
 // limit < 0 means go all the way
 func checkAll(limit int) error {
 	checkOne := func(proxy net.Addr, testURL *url.URL) {
@@ -150,10 +95,39 @@ func checkProxy(proxy net.Addr, testURL *url.URL) CheckResult {
 	return res
 }
 
+func saveCheckToDB(res CheckResult) error {
+	insertStmt :=
+		"INSERT INTO checks VALUES ($1, $2, $3, $4, $5, $6)"
+	log.Printf(
+		"%v | %v | %v | %v | %v | %v",
+		res.proxy.String(), res.testURL.String(), res.ts, res.worked, res.statusCode, res.errorMsg,
+	)
+	_, err := db.Exec(
+		insertStmt,
+		res.proxy.String(), res.testURL.String(), res.ts, res.worked, res.statusCode, res.errorMsg,
+	)
+	return err
+}
+
 type FetchResult struct {
 	providerURL *url.URL
 	proxy       net.Addr
 	ts          time.Time
+}
+
+func fetchNow() {
+	for _, prov := range providers.list() {
+		list, err := fetchProxiesFromProvider(prov)
+		if err != nil {
+			log.Printf("can't fetch from %v, err: %v", prov, err)
+		}
+		for _, fetch := range list {
+			err := saveFetchToDB(fetch)
+			if err != nil {
+				log.Printf("Error during writing %+v to DB: %v", fetch, err)
+			}
+		}
+	}
 }
 
 func fetchProxiesFromProvider(prov *url.URL) ([]FetchResult, error) {
@@ -170,29 +144,6 @@ func fetchProxiesFromProvider(prov *url.URL) ([]FetchResult, error) {
 		}
 	}
 	return res, nil
-}
-
-type UrlList struct{ urls []*url.URL }
-
-func (list *UrlList) overwrite(newList []string) error {
-	newURLs := []*url.URL{}
-	for _, str := range newList {
-		url, err := url.Parse(str)
-		if err != nil {
-			return err
-		}
-		if url.Hostname() == "" {
-			return fmt.Errorf("%s is not a URL", str)
-		}
-		newURLs = append(newURLs, url)
-	}
-	list.urls = newURLs
-	log.Print(newURLs)
-	return nil
-}
-
-func (list UrlList) list() []*url.URL {
-	return list.urls
 }
 
 func fetchProxyList(provider *url.URL) ([]string, error) {
@@ -225,6 +176,55 @@ func fetchProxyList(provider *url.URL) ([]string, error) {
 	}
 
 	return nil, fmt.Errorf("No idea how we got to this point in the code ...")
+}
+
+func saveFetchToDB(fetch FetchResult) error {
+	insertStmt := "INSERT INTO fetch_runs VALUES ($1, $2, $3)"
+	_, err := db.Exec(insertStmt, fetch.providerURL.String(), fetch.proxy.String(), fetch.ts)
+	return err
+}
+
+func retrieveDistinctProxies() ([]net.Addr, error) {
+	getProxyList := "SELECT DISTINCT proxy FROM fetch_runs"
+	rows, err := db.Query(getProxyList)
+	if err != nil {
+		log.Fatal(err)
+	}
+	proxyList := []net.Addr{}
+	for rows.Next() {
+		var proxy string
+		rows.Scan(&proxy)
+		parsed, err := net.ResolveTCPAddr("tcp4", proxy)
+		if err != nil {
+			log.Fatal(
+				"got an invalid proxy address from the DB although that should be impossible")
+		}
+		proxyList = append(proxyList, parsed)
+	}
+	return proxyList, rows.Err()
+}
+
+type UrlList struct{ urls []*url.URL }
+
+func (list *UrlList) overwrite(newList []string) error {
+	newURLs := []*url.URL{}
+	for _, str := range newList {
+		url, err := url.Parse(str)
+		if err != nil {
+			return err
+		}
+		if url.Hostname() == "" {
+			return fmt.Errorf("%s is not a URL", str)
+		}
+		newURLs = append(newURLs, url)
+	}
+	list.urls = newURLs
+	log.Print(newURLs)
+	return nil
+}
+
+func (list UrlList) list() []*url.URL {
+	return list.urls
 }
 
 type ProxyListItem struct {
