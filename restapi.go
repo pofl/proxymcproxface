@@ -16,6 +16,7 @@ func ginit() *gin.Engine {
 	r.POST("/fetch", triggerFetch)
 	r.POST("/check", triggerCheck)
 	r.POST("/clear", clearDB)
+	r.StaticFile("/", "index.html")
 	return r
 }
 
