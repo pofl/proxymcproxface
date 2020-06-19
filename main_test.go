@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 )
 
@@ -101,13 +100,6 @@ func TestFetchProxyList(t *testing.T) {
 		_, err := fetchProxyList(provider)
 		require.NoError(t, err)
 	}
-}
-
-func TestUpdate(t *testing.T) {
-	viper.Set("proxies_take_first", 2)
-	require.NoError(t, connectDB())
-	err := updateNow()
-	require.NoError(t, err)
 }
 
 func TestProxyList(t *testing.T) {

@@ -10,8 +10,6 @@ import (
 	"net/url"
 	"strings"
 	"time"
-
-	"github.com/spf13/viper"
 )
 
 var testURLs UrlList
@@ -58,33 +56,6 @@ func fetchNow() {
 			}
 		}
 	}
-}
-
-func updateNow() error {
-	viper.SetDefault("proxies_take_first", 0)
-	limit := viper.GetInt("proxies_take_first")
-	for _, prov := range providers.list() {
-		list, err := fetchProxiesFromProvider(prov)
-		if err != nil {
-			log.Fatal(err)
-		}
-		var actualList []FetchResult
-		if limit > 0 {
-			actualList = list[:limit]
-		} else {
-			actualList = list
-		}
-		for _, fetch := range actualList {
-			for _, testURL := range testURLs.list() {
-				res := checkProxy(fetch.proxy, testURL)
-				err = saveCheckToDB(res)
-				if err != nil {
-					log.Print(err)
-				}
-			}
-		}
-	}
-	return nil
 }
 
 func saveCheckToDB(res checkResult) error {
