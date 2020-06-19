@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"strings"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -33,6 +34,28 @@ func connectDB() error {
 
 func initDB() error {
 	return execSQLFile("schema.sql")
+}
+
+type UrlList struct{ urls []*url.URL }
+
+func (list *UrlList) overwrite(newList []string) error {
+	newURLs := []*url.URL{}
+	for _, str := range newList {
+		url, err := url.Parse(str)
+		if err != nil {
+			return err
+		}
+		if url.Hostname() == "" {
+			return fmt.Errorf("%s is not a URL", str)
+		}
+		newURLs = append(newURLs, url)
+	}
+	list.urls = newURLs
+	return nil
+}
+
+func (list UrlList) list() []*url.URL {
+	return list.urls
 }
 
 func execSQLFile(path string) error {

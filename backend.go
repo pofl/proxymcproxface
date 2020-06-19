@@ -204,29 +204,6 @@ func retrieveDistinctProxies() ([]net.Addr, error) {
 	return proxyList, rows.Err()
 }
 
-type UrlList struct{ urls []*url.URL }
-
-func (list *UrlList) overwrite(newList []string) error {
-	newURLs := []*url.URL{}
-	for _, str := range newList {
-		url, err := url.Parse(str)
-		if err != nil {
-			return err
-		}
-		if url.Hostname() == "" {
-			return fmt.Errorf("%s is not a URL", str)
-		}
-		newURLs = append(newURLs, url)
-	}
-	list.urls = newURLs
-	log.Print(newURLs)
-	return nil
-}
-
-func (list UrlList) list() []*url.URL {
-	return list.urls
-}
-
 type ProxyListItem struct {
 	Proxy       string
 	LastSuccess time.Time
