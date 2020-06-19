@@ -39,7 +39,7 @@ type checkResult struct {
 	errorMsg   string
 }
 
-func saveFetchToDB(fetch fetchResult) error {
+func saveFetchToDB(fetch FetchResult) error {
 	insertStmt := "INSERT INTO fetch_runs VALUES ($1, $2, $3)"
 	_, err := db.Exec(insertStmt, fetch.providerURL.String(), fetch.proxy.String(), fetch.ts)
 	return err
@@ -68,7 +68,7 @@ func updateNow() error {
 		if err != nil {
 			log.Fatal(err)
 		}
-		var actualList []fetchResult
+		var actualList []FetchResult
 		if limit > 0 {
 			actualList = list[:limit]
 		} else {
@@ -179,22 +179,22 @@ func checkProxy(proxy net.Addr, testURL *url.URL) checkResult {
 	return res
 }
 
-type fetchResult struct {
+type FetchResult struct {
 	providerURL *url.URL
 	proxy       net.Addr
 	ts          time.Time
 }
 
-func fetchProxiesFromProvider(prov *url.URL) ([]fetchResult, error) {
-	res := []fetchResult{}
-	list, err := fetchProxyList(prov)
+func fetchProxiesFromProvider(prov *url.URL) ([]FetchResult, error) {
+	res := []FetchResult{}
+	proxies, err := fetchProxyList(prov)
 	if err != nil {
 		return nil, err
 	}
-	for _, p := range list {
-		addr, err := net.ResolveTCPAddr("tcp4", p)
+	for _, proxy := range proxies {
+		addr, err := net.ResolveTCPAddr("tcp4", proxy)
 		if err == nil {
-			fetch := fetchResult{prov, addr, time.Now()}
+			fetch := FetchResult{prov, addr, time.Now()}
 			res = append(res, fetch)
 		}
 	}

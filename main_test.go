@@ -15,8 +15,8 @@ import (
 
 var exampleCheckRes1 checkResult
 var exampleCheckRes2 checkResult
-var exampleFetchRes1 fetchResult
-var exampleFetchRes2 fetchResult
+var exampleFetchRes1 FetchResult
+var exampleFetchRes2 FetchResult
 
 func TestMain(m *testing.M) {
 	proxy1, _ := net.ResolveTCPAddr("tcp4", "1.2.3.4:5")
@@ -24,8 +24,8 @@ func TestMain(m *testing.M) {
 	testURL, _ := url.Parse("https://motherfuckingwebsite.com/")
 	exampleCheckRes1 = checkResult{proxy1, testURL, time.Now(), true, 0, ""}
 	exampleCheckRes2 = checkResult{proxy2, testURL, time.Now(), true, 0, ""}
-	exampleFetchRes1 = fetchResult{testURL, proxy1, time.Now()}
-	exampleFetchRes2 = fetchResult{testURL, proxy2, time.Now()}
+	exampleFetchRes1 = FetchResult{testURL, proxy1, time.Now()}
+	exampleFetchRes2 = FetchResult{testURL, proxy2, time.Now()}
 
 	os.Exit(m.Run())
 }
