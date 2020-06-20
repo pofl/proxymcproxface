@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/url"
-	"strings"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
@@ -33,7 +32,21 @@ func connectDB() error {
 }
 
 func initDB() error {
-	return execSQLFile("schema.sql")
+	sqlFilesToRun := []string{
+		"sql/table_fetch_runs.sql",
+		"sql/table_checks.sql",
+	}
+	for _, path := range sqlFilesToRun {
+		query, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		_, err = db.Exec(string(query))
+		if err != nil {
+			return fmt.Errorf("error {%w} during execution of query {%s}", err, query)
+		}
+	}
+	return nil
 }
 
 type UrlList struct{ urls []*url.URL }
@@ -59,19 +72,13 @@ func (list UrlList) list() []*url.URL {
 }
 
 func execSQLFile(path string) error {
-	file, err := ioutil.ReadFile(path)
+	query, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
 	}
-
-	queries := strings.Split(string(file), ";")
-
-	for _, query := range queries {
-		log.Print("executing query ", query)
-		_, err := db.Exec(query)
-		if err != nil {
-			return fmt.Errorf("error {%w} during execution of query {%s}", err, query)
-		}
+	_, err = db.Exec(string(query))
+	if err != nil {
+		return fmt.Errorf("error {%w} during execution of query {%s}", err, query)
 	}
 	return nil
 }

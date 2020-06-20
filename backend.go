@@ -212,11 +212,15 @@ type ProxyListItem struct {
 }
 
 func getProxyList(limit int) ([]ProxyListItem, error) {
-	query := "SELECT * FROM proxy_details"
-	if limit > 0 {
-		query = query + fmt.Sprintf(" LIMIT %d", limit)
+	query, err := ioutil.ReadFile("sql/query_proxy_details.sql")
+	if err != nil {
+		return nil, err
 	}
-	rows, err := db.Query(query)
+	finalQuery := string(query)
+	if limit > 0 {
+		finalQuery = finalQuery + fmt.Sprintf(" LIMIT %d", limit)
+	}
+	rows, err := db.Query(finalQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +246,12 @@ type ProviderDetails struct {
 
 func listProviders() ([]ProviderDetails, error) {
 	res := []ProviderDetails{}
-	rows, err := db.Query("SELECT * FROM provider_details")
+
+	query, err := ioutil.ReadFile("sql/query_provider_details.sql")
+	if err != nil {
+		return nil, err
+	}
+	rows, err := db.Query(string(query))
 	if err != nil {
 		return nil, err
 	}
