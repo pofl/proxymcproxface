@@ -12,7 +12,7 @@ func ginit() *gin.Engine {
 	r := gin.Default()
 	r.GET("/proxies", proxyList)
 	r.GET("/providers", listProviderDetails)
-	r.POST("/providers", setProviders)
+	r.PUT("/providers", setProviders)
 	r.POST("/fetch", triggerFetch)
 	r.POST("/check", triggerCheck)
 	r.POST("/clear", clearDB)
