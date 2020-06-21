@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -19,7 +18,7 @@ func init() {
 	providers = UrlList{[]*url.URL{}}
 	providers.overwrite([]string{
 		"https://www.proxy-list.download/api/v1/get?type=http",
-		// "https://api.proxyscrape.com/?request=displayproxies&proxytype=http",
+		"https://api.proxyscrape.com/?request=displayproxies&proxytype=http",
 	})
 
 	testURLs = UrlList{[]*url.URL{}}
@@ -209,6 +208,8 @@ type ProxyListItem struct {
 	LastSuccess time.Time
 	LastSeen    time.Time
 	FirstSeen   time.Time
+	// ErrorMsg
+	// Success
 }
 
 func getProxyList(limit int) ([]ProxyListItem, error) {
@@ -231,7 +232,7 @@ func getProxyList(limit int) ([]ProxyListItem, error) {
 		item := ProxyListItem{}
 		err = rows.Scan(&item.Proxy, &item.LastSuccess, &item.LastSeen, &item.FirstSeen)
 		if err != nil {
-			return res, errors.New("Scan didn't work")
+			return res, err
 		}
 		res = append(res, item)
 	}
@@ -240,8 +241,8 @@ func getProxyList(limit int) ([]ProxyListItem, error) {
 }
 
 type ProviderDetails struct {
-	Provider   string
-	LastUpdate time.Time
+	Provider  string
+	LastFetch time.Time
 }
 
 func listProviders() ([]ProviderDetails, error) {
@@ -257,7 +258,7 @@ func listProviders() ([]ProviderDetails, error) {
 	}
 	for rows.Next() {
 		var prov ProviderDetails
-		err := rows.Scan(&prov.Provider, &prov.LastUpdate)
+		err := rows.Scan(&prov.Provider, &prov.LastFetch)
 		if err != nil {
 			// there really shouldn't be an error here so make it very visible if there ever is
 			log.Fatal(err)

@@ -1,6 +1,7 @@
 <html>
   <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.min.css">
+    <title>Proxy McProxface</title>
   </head>
   <script>
     function jsonToTable(headers, data) {
@@ -29,14 +30,14 @@
       })
     }
     function fetchNow() {
-      fetch('http://127.0.0.1:5000/fetch', {
+      fetch('/fetch', {
         method: 'POST'
       }).then(resp => {
         console.log(resp.status)
       })
     }
     function checkNow() {
-      fetch('http://127.0.0.1:5000/check', {
+      fetch('/check', {
         method: 'POST'
       }).then(resp => {
         console.log(resp.status)
@@ -44,13 +45,13 @@
     }
     function proxyList() {
       let headers = ["Proxy", "LastSuccess", "LastSeen", "FirstSeen"]
-      fetch('http://127.0.0.1:5000/proxies').then(resp => resp.json()).then(data => {
+      fetch('/proxies').then(resp => resp.json()).then(data => {
         jsonToTable(headers, data)
       })
     }
     function providerList() {
-      let headers = ["Provider", "LastUpdate"]
-      fetch('http://127.0.0.1:5000/providers').then(resp => resp.json()).then(data => {
+      let headers = ["Provider", "LastFetch"]
+      fetch('/providers').then(resp => resp.json()).then(data => {
         jsonToTable(headers, data)
       })
     }
@@ -58,10 +59,10 @@
   <body>
     <fieldset>
       <legend>Interaction</legend>
-      <button onclick="fetchNow()">Fetch</button>
-      <button onclick="checkNow()">Check</button>
-      <button onclick="proxyList()">Proxies</button>
-      <button onclick="providerList()">Providers</button>
+      <button onclick="fetchNow()">Run fetch</button>
+      <button onclick="checkNow()">Run check</button>
+      <button onclick="proxyList()">See proxies</button>
+      <button onclick="providerList()">See providers</button>
     </fieldset>
     <div id="content"></div>
   </body>

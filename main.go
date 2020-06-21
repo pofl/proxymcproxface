@@ -22,7 +22,7 @@ func main() {
 		log.Fatal(err)
 	}
 	router := ginit()
-	router.Run("localhost:5000")
+	router.Run(":5000")
 }
 
 func connectDB() error {
