@@ -1,12 +1,10 @@
-# Proxy server aggregator assignment
-
-Author: Florian Polster
-
-Study course: Master Informatik
-
-Matriculation number: 318051
-
 ---
+title: Proxy server aggregator assignment
+author: Florian Polster
+study-course: Master Informatik
+matriculation-number: 318051
+---
+# Proxy server aggregator assignment
 
 ## Overview
 
@@ -25,7 +23,7 @@ In this document there are some terms that have a specific meaning in the
 context of this project:
 
 - _fetch_ - the act of retrieving a list of proxies from one or more providers
-- _check_ - the act of testing whether a URL can be reached by a request through
+- _check_ - the testing of whether a URL can be reached by a request through
   a proxy
 - _(web) service_ and _application_ - will be used interchangeably in this
   document to refer to the software that is developed in the course of this
@@ -54,29 +52,31 @@ The backend is split into two major parts.
 2. __restapi.go__ contains for every endpoint exposed by the REST API a function
    that is called when the endpoint is hit. These functions perform little logic
    themselves but rather call functions in backend.go that implement the
-   behavior.
+   behavior. One can think of this file as an implementation of the adapter
+   design pattern adapting the interface (as in a set of functions) provided by
+   backend.go to a RESTful HTTP interface.
 
 ## Providers
 
-To the application a proxy list provider is just a URL. It will send a GET
-request to the URL and expects the response to be formatted as a plain list of
-`<IP>:<port>` pairs delimited by CRLF-bytes (`\r\n`) or just a new-line byte
+To the application a proxy list provider is just a URL. The backend will send a
+GET request to the URL and expects the response to be formatted as a plain list
+of `<IP>:<port>` pairs delimited by CRLF-bytes (`\r\n`) or just a new-line byte
 (`\n`).
 
 The service exposes a very simple API to manage the providers it knows. The
-route is "/providers". A GET request to this route will answered with a
+route is "/providers". A GET request to this route will be answered with a
 JSON-formatted list of the currently known provider URLs. In the body of a PUT
 request to this endpoint the user can provide a list of provider URLs. The list
 of known providers that the backend keeps will completely replaced by this
 user-provided list.
 
-This API design was chosen because the list of providers was thought of as a
-resource. While the correct method to retrieve the resource is obviously GET
-there is an argument to be made whether POST should be used instead of PUT. But
-the author understands that for an idiomatic REST API POST is meant for requests
-that _create_ a resource or _invoke_ an operation. In this case the providers
-resource is _replaced_ by the body content of the request which calls for PUT as
-the HTTP method.
+This API design (PUT method) was chosen because the list of providers was
+thought of as a resource. While the correct method to retrieve the resource is
+obviously GET there is an argument to be made whether POST should be used
+instead of PUT. The author's understanding is that for idiomatic REST APIs
+POST is meant for requests that _create_ a resource or _invoke_ an operation. In
+this case the providers resource is _replaced_ by the body content of the
+request. This calls for PUT as the HTTP method.
 
 ## Database & Schema
 
@@ -102,7 +102,7 @@ information:
     - date of the last successful update of the proxy list
     - date of the last attempt to update
     - number of records found on last update *
-    - indication of an error that occurred during the last update __TODO__
+    - indication of an error that occurred during the last update *
 - The following information of all available test URLs can be displayed:
     - test URL __TODO__
     - details of functionality test validation *
@@ -121,11 +121,10 @@ be necessary to think early about certain aspects:
 None of these are concerns with this project. The requirements are static. The
 service will not go live. Therefore trade-offs can be made, shortcuts can be
 taken, where lower engineering standards, deliberately chosen, can lead to
-faster results.
-
-The first shortcut taken in this project is a simplified schema. If held to high
-standards the schema would follow at least the third normal form and look
-roughly like this:
+faster results. The first shortcut taken in this project is a simplified schema.
+The following image shows the schema that might be chosen if engineering quality
+was a bigger concern. In that case the schema would have adhered at least to the
+third normal form and might therefore look similiar to this one:
 
 ![The would-be 3NF schema](out/hypothetical3NF/hypothetical3NF.svg)
 
@@ -135,18 +134,19 @@ medium-sophisticated SQL queries.
 For the proxies table it is arguable how to represent the port address. On the
 one extreme it could be argued that it is acceptable to keep the address as a
 string of the form 1.2.3.4:5678, since it will always be used like this and the
-individual parts are never going to be looked at in isolation. On the other
-extreme it could be argued that the most idiomatic form of adhering to
+individual parts are likely never going to be looked at in isolation. On the
+other extreme it could be argued that the most idiomatic form of adhering to
 normalization rules would be to split the IP address up into four 8-bit integer
 values in order to achieve atomicity.
 
 It's interesting to note that this normalized schema looks a lot like a
-dimensional schema that would be found in data warehousing. _fetch_found_ and
-_check_results_ are basically fact tables and the other tables dimension tables.
+dimensional schema that would be found in data warehousing. *fetch_found* and
+*check_results* are basically fact tables and the other tables dimension tables.
 The only difference being that if one would follow the Kimball school of
-dimensional design, time would be made a separate dimension.
+dimensional design, time would be a separate dimension.
 
-The schema used in the author's implementation is much simpler and looks like the following:
+The schema used in the author's implementation is much simpler and looks like
+the following:
 
 ```sql
 CREATE TABLE fetch_runs (
@@ -166,9 +166,12 @@ CREATE TABLE checks (
 
 This is clearly inferior to the normalized schema discussed above. It results in
 much more data redundancy and storage space inefficiency. But it immensely
-simplifies the application code.
-
-__TODO__ no primary keys, indexes
+simplifies the application code. The simplicity paradigm goes so far that there
+are no foreign keys or even primary keys are defined. This avoids any potential
+problems that might arise from referential integrity constraints. There are also
+no indexes. In a scenario where query speed is a concern the author would
+analyze critical queries and add indexes on columns that appear in `WHERE`
+clauses.
 
 The two most complex SQL queries that are run against the database are the
 queries that retrieve the data for the proxy detail information and the provider
@@ -214,17 +217,17 @@ The frontend is a single HTML file with embedded JavaScript. For visual enhancem
 
 The page consists of a top bar containing buttons. These are the primary interactive elements of the web page. After first visiting the page this top bar is all that is visible.
 
-![](nothing.png)
+![Interactive elements of the web page](nothing.png)
 
 Clicking on "Run fetch" invokes the backend to fetch proxy lists from the currently known providers immediately. "Run check" invokes the testing of all currently known proxy addresses to see if the currently given test URLs can be reached through each proxy. This process takes very long and is there fore run in the background.
 
 Clicking on "See proxies" reveals a table displaying all currently known-to-work proxies and some details about them.
 
-![](proxy-details.png)
+![The proxy list with details](proxy-details.png)
 
 Clicking on "See providers" reveals a table displaying all currently known providers as well as a timestamp when the providers was last fetched from.
 
-![](provider-details.png)
+![The provider list with details](provider-details.png)
 
 ## REST API
 
@@ -243,31 +246,48 @@ Clicking on "See providers" reveals a table displaying all currently known provi
     - No response body
 - Endpoint `POST /check`
     - This triggers the checking of all currently known proxy addresses
-    - Accepts an optional integer query parameter 'limit'
+    - Accepts an optional integer query parameter 'limit' **
         - Example: `POST /check?limit=20`
         - Scanning is stopped after _limit_ tested proxies
-    - Response `202 Accepted` in case of success. 202 was chosen here because the check will be run asynchronously in the background. So although a response is sent right away the processing of it is actually not finished in that moment.
+    - Response `202 Accepted` in case of success. 202 was chosen here because
+      the check will be run asynchronously in the background. So although a
+      response is sent right away the processing of it is actually not finished
+      in that moment.
     - No response body
 - Endpoint `GET /proxies`
     - Takes no query parameters or body content
     - Response `204 No Content` in case of success
-        - Body contains a JSON encoded list of proxies and some further information about them, for an example see below
+        - Body contains a JSON encoded list of proxies and some further
+          information about them, for an example see below
     - Response `500 Internal Server Error` in case something went wrong
         - Body contains short error message
 - Endpoint `GET /providers`
     - Takes no query parameters or body content
     - Response `200 OK` in case of success
-        - Body contains a JSON encoded list of provider URLs plus some additional info for each
+        - Body contains a JSON encoded list of provider URLs plus some
+          additional info for each
     - Response `500 Internal Server Error` in case something went wrong
+      the request body
         - Body contains short error message
 - Endpoint `PUT /providers` __bugged__
-    - Overwrite the internally kept list of providers with those provided in the request body 
+    - Overwrite the internally kept list of providers with those provided in the
+      request body
     - Takes no query parameters or body content
     - Response `204 No Content` in case of success
         - Body is empty
-    - Response `500 Internal Server Error` in case something went wrong
+    - Response `400 Bad Request` in case something is wrong with the content of
         - Body contains short error message
-- All other endpoints will be rejected with either _404 Not Found_ or _405 Method Not Allowed_.
+- All other endpoints will be rejected with either _404 Not Found_ or 
+  _405 Method Not Allowed_.
+
+** By instinct, it might feel unintuitive that a POST request has a query
+string. That is normal for GET requests but not for POST requests. "Parameters"
+of POST requests are conventionally submitted as the body. The decision of
+designing the limit parameter as a query string is about semantics. The body of
+a POST request is usually the new entity in a request with creation semantics.
+The semantics of this limit parameter, however, is more of a narrowing of scope
+for a request with operation invoking semantics. Therefore this design has been
+chosen.
 
 Example response for `GET /proxies` (reponse truncated for brevity):
 ```
