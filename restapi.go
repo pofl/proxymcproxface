@@ -56,7 +56,7 @@ func clearDB(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
-	c.String(http.StatusOK, "DB cleared", nil)
+	c.String(http.StatusNoContent, "DB cleared", nil)
 }
 
 func listProviderDetails(c *gin.Context) {
