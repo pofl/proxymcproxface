@@ -21,7 +21,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	router := ginit()
+	router := newServer()
 	router.Run(":5000")
 }
 

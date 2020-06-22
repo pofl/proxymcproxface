@@ -16,7 +16,7 @@ import (
 func TestProxyListEndpoint(t *testing.T) {
 	require.NoError(t, connectDB())
 	require.NoError(t, initDB())
-	server := ginit()
+	server := newServer()
 
 	// populate DB to have at least 2 records
 	_ = saveFetchToDB(exampleFetchRes1)
@@ -58,7 +58,7 @@ func TestProxyListEndpoint(t *testing.T) {
 func TestFetchEndpoint(t *testing.T) {
 	require.NoError(t, connectDB())
 	require.NoError(t, initDB())
-	gin := ginit()
+	gin := newServer()
 
 	cntQuery := "SELECT COUNT(*) FROM fetch_runs"
 	var cntBefore, cntAfter int
@@ -76,7 +76,7 @@ func TestFetchEndpoint(t *testing.T) {
 func TestCheckEndpoint(t *testing.T) {
 	require.NoError(t, connectDB())
 	require.NoError(t, initDB())
-	gin := ginit()
+	gin := newServer()
 
 	cntQuery := "SELECT COUNT(*) FROM checks"
 	var cntBefore int
@@ -100,7 +100,7 @@ func TestCheckEndpoint(t *testing.T) {
 func TestProviderDetails(t *testing.T) {
 	require.NoError(t, connectDB())
 	require.NoError(t, initDB())
-	server := ginit()
+	server := newServer()
 
 	// populate DB to have at least 2 records
 	_ = saveFetchToDB(exampleFetchRes1)
@@ -123,7 +123,7 @@ func TestProviderDetails(t *testing.T) {
 func TestTestURLEndpoints(t *testing.T) {
 	require.NoError(t, connectDB())
 	require.NoError(t, initDB())
-	server := ginit()
+	server := newServer()
 
 	urls := []string{
 		"https://motherfuckingwebsite.com/",

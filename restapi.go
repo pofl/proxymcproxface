@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ginit() *gin.Engine {
+func newServer() *gin.Engine {
 	r := gin.Default()
 	r.StaticFile("/", "index.html")
 	r.POST("/fetch", invokeFetch)
