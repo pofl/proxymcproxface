@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -117,4 +118,30 @@ func TestProviderDetails(t *testing.T) {
 	err = json.Unmarshal(rr.Body.Bytes(), &got)
 	require.NoError(t, err)
 	require.Greater(t, len(got), 0)
+}
+
+func TestTestURLEndpoints(t *testing.T) {
+	require.NoError(t, connectDB())
+	require.NoError(t, initDB())
+	server := ginit()
+
+	urls := []string{
+		"https://motherfuckingwebsite.com/",
+		"http://txti.es/",
+	}
+	payload, err := json.Marshal(urls)
+	require.NoError(t, err)
+	putRR := httptest.NewRecorder()
+	putReq := httptest.NewRequest("PUT", "/testurls", strings.NewReader(string(payload)))
+	getRR := httptest.NewRecorder()
+	getReq := httptest.NewRequest("GET", "/testurls", nil)
+
+	server.ServeHTTP(putRR, putReq)
+	require.Equal(t, http.StatusNoContent, putRR.Result().StatusCode)
+	server.ServeHTTP(getRR, getReq)
+
+	var respURLs []string
+	err = json.Unmarshal(getRR.Body.Bytes(), &respURLs)
+	require.NoError(t, err)
+	require.ElementsMatch(t, urls, respURLs)
 }
