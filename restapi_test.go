@@ -25,7 +25,6 @@ func TestProxyListEndpoint(t *testing.T) {
 	require.NoError(t, err)
 
 	req := httptest.NewRequest("GET", "/proxies", nil)
-	limitedReq := httptest.NewRequest("GET", "/proxies?limit=1", nil)
 
 	checkResponse := func(
 		testCaseName string, req *http.Request,
@@ -44,14 +43,6 @@ func TestProxyListEndpoint(t *testing.T) {
 		err = json.Unmarshal(res.Body.Bytes(), &got)
 		require.NoError(t, err)
 		require.GreaterOrEqual(t, len(got), 2)
-	})
-
-	checkResponse("Happy path with limit", limitedReq, func(res *httptest.ResponseRecorder) {
-		require.Equal(t, 200, res.Code)
-		var got []gin.H
-		err = json.Unmarshal(res.Body.Bytes(), &got)
-		require.NoError(t, err)
-		require.Equal(t, 1, len(got))
 	})
 
 	// sad path

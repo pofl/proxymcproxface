@@ -212,16 +212,12 @@ type ProxyListItem struct {
 	// Success
 }
 
-func getProxyList(limit int) ([]ProxyListItem, error) {
+func getProxyList() ([]ProxyListItem, error) {
 	query, err := ioutil.ReadFile("sql/query_proxy_details.sql")
 	if err != nil {
 		return nil, err
 	}
-	finalQuery := string(query)
-	if limit > 0 {
-		finalQuery = finalQuery + fmt.Sprintf(" LIMIT %d", limit)
-	}
-	rows, err := db.Query(finalQuery)
+	rows, err := db.Query(string(query))
 	if err != nil {
 		return nil, err
 	}

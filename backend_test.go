@@ -104,7 +104,7 @@ func TestFetchProxyList(t *testing.T) {
 func TestProxyList(t *testing.T) {
 	require.NoError(t, connectDB())
 	require.NoError(t, initDB())
-	list, err := getProxyList(0)
+	list, err := getProxyList()
 	require.NoError(t, err)
 	require.NotEmpty(t, list)
 }
