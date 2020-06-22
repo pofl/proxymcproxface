@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"net"
 	"net/url"
 	"os"
@@ -63,45 +62,4 @@ func TestDBInit(t *testing.T) {
 	require.NoError(t, initDB())
 	require.True(t, tableExists(db, "checks"))
 	require.True(t, tableExists(db, "fetch_runs"))
-}
-
-func getNWorkingProxies(n int) ([]net.Addr, error) {
-	providerURL := providers.list()[0]
-	proxies, err := fetchProxyList(providerURL)
-	if err != nil {
-		return nil, err
-	}
-	workingProxies := []net.Addr{}
-	for _, proxy := range proxies {
-		proxyAddr, err := net.ResolveTCPAddr("tcp4", proxy)
-		if err != nil {
-			return nil, err
-		}
-		testURL, _ := url.Parse("https://motherfuckingwebsite.com/")
-		if err == nil {
-			res := checkProxy(proxyAddr, testURL)
-			if res.worked == true {
-				workingProxies = append(workingProxies, proxyAddr)
-				if !(len(workingProxies) < n) {
-					break
-				}
-			}
-		}
-	}
-	if len(workingProxies) != n {
-		return nil, fmt.Errorf("Not enough working proxies found")
-	}
-	return workingProxies, nil
-}
-
-func TestBasicRequestWithProxy(t *testing.T) {
-	_, err := getNWorkingProxies(1)
-	require.NoError(t, err)
-}
-
-func TestFetchProxyList(t *testing.T) {
-	for _, provider := range providers.list() {
-		_, err := fetchProxyList(provider)
-		require.NoError(t, err)
-	}
 }
