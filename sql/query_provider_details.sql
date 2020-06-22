@@ -1,5 +1,6 @@
 SELECT
-    provider_url, -- base address (URL) of the proxy list
-    MAX(ts) AS last_update -- date of the last attempt to update
+    provider_url,
+    MAX(ts) AS last_update
 FROM fetch_runs
+WHERE provider_url = $1
 GROUP BY provider_url

@@ -242,24 +242,26 @@ type ProviderDetails struct {
 }
 
 func listProviders() ([]ProviderDetails, error) {
-	res := []ProviderDetails{}
-
-	query, err := ioutil.ReadFile("sql/query_provider_details.sql")
-	if err != nil {
-		return nil, err
-	}
-	rows, err := db.Query(string(query))
-	if err != nil {
-		return nil, err
-	}
-	for rows.Next() {
-		var prov ProviderDetails
-		err := rows.Scan(&prov.Provider, &prov.LastFetch)
+	list := []ProviderDetails{}
+	currentProviders := providers.list()
+	for _, provider := range currentProviders {
+		var details ProviderDetails
+		query, err := ioutil.ReadFile("sql/query_provider_details.sql")
 		if err != nil {
-			// there really shouldn't be an error here so make it very visible if there ever is
-			log.Fatal(err)
+			return nil, err
 		}
-		res = append(res, prov)
+		row := db.QueryRow(string(query), provider.String())
+		err = row.Scan(&details.Provider, &details.LastFetch)
+		if err != nil {
+			if strings.Contains(err.Error(), "no rows") {
+				// this error is expected
+				details = ProviderDetails{provider.String(), time.Unix(0, 0)}
+			} else {
+				// any other error is not expected so make it very visible if it ever occurs
+				log.Fatal(err)
+			}
+		}
+		list = append(list, details)
 	}
-	return res, rows.Err()
+	return list, nil
 }
