@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="271px" preserveAspectRatio="none" style="width:570px;height:271px;" version="1.1" viewBox="0 0 570 271" width="570px" zoomAndPan="magnify"><defs><filter height="300%" id="f85ykeg129ttv" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[0ac1b9d7356e030c598f001f92529c73]
+class proxies--><rect fill="#FEFECE" filter="url(#f85ykeg129ttv)" height="82.6016" id="proxies" style="stroke: #A80036; stroke-width: 1.5;" width="71" x="252" y="28.5"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="40" x="267.5" y="45.957">proxies</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="253" x2="322" y1="53.5938" y2="53.5938"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="42" x="258" y="69.0127">proxy_id</text><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="14" x="303" y="69.0127">PK</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="8" x="258" y="82.8486">ip</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="19" x="258" y="96.6846">port</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="253" x2="322" y1="103.1016" y2="103.1016"/><!--MD5=[f2e77e1e223178f10605276bdf64a437]
+class providers--><rect fill="#FEFECE" filter="url(#f85ykeg129ttv)" height="68.7656" id="providers" style="stroke: #A80036; stroke-width: 1.5;" width="83" x="134" y="192"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="51" x="150" y="209.457">providers</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="135" x2="216" y1="217.0938" y2="217.0938"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="54" x="140" y="232.5127">provider_id</text><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="14" x="197" y="232.5127">PK</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="12" x="140" y="246.3486">url</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="135" x2="216" y1="252.7656" y2="252.7656"/><!--MD5=[a3bd2ce23abe3445022fb1f1b92b87c8]
+class fetch_runs--><rect fill="#FEFECE" filter="url(#f85ykeg129ttv)" height="68.7656" id="fetch_runs" style="stroke: #A80036; stroke-width: 1.5;" width="93" x="6" y="35.5"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="58" x="23.5" y="52.957">fetch_runs</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="7" x2="98" y1="60.5938" y2="60.5938"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="39" x="12" y="76.0127">fetch_id</text><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="14" x="54" y="76.0127">PK</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="81" x="12" y="89.8486">date TIMESTAMP</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="7" x2="98" y1="96.2656" y2="96.2656"/><!--MD5=[4c1223b476e9e5d9cd164af92edfbaac]
+class fetch_found--><rect fill="#FEFECE" filter="url(#f85ykeg129ttv)" height="82.6016" id="fetch_found" style="stroke: #A80036; stroke-width: 1.5;" width="82" x="134.5" y="28.5"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="64" x="143.5" y="45.957">fetch_found</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="135.5" x2="215.5" y1="53.5938" y2="53.5938"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="39" x="140.5" y="69.0127">fetch_id</text><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="13" x="182.5" y="69.0127">FK</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="54" x="140.5" y="82.8486">provider_id</text><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="13" x="197.5" y="82.8486">FK</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="42" x="140.5" y="96.6846">proxy_id</text><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="13" x="185.5" y="96.6846">FK</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="135.5" x2="215.5" y1="103.1016" y2="103.1016"/><!--MD5=[029b2b6ec017d01f9e020d1c0607804f]
+class test_urls--><rect fill="#FEFECE" filter="url(#f85ykeg129ttv)" height="68.7656" id="test_urls" style="stroke: #A80036; stroke-width: 1.5;" width="79" x="366" y="192"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="48" x="381.5" y="209.457">test_urls</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="367" x2="444" y1="217.0938" y2="217.0938"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="50" x="372" y="232.5127">test_url_id</text><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="14" x="425" y="232.5127">PK</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="12" x="372" y="246.3486">url</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="367" x2="444" y1="252.7656" y2="252.7656"/><!--MD5=[7b5caa4fa05b1f3fc36bdae291e49863]
+class check_runs--><rect fill="#FEFECE" filter="url(#f85ykeg129ttv)" height="68.7656" id="check_runs" style="stroke: #A80036; stroke-width: 1.5;" width="72" x="487.5" y="35.5"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="64" x="491.5" y="52.957">check_runs</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="488.5" x2="558.5" y1="60.5938" y2="60.5938"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="43" x="493.5" y="76.0127">check_id</text><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="14" x="539.5" y="76.0127">PK</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="47" x="493.5" y="89.8486">start_time</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="488.5" x2="558.5" y1="96.2656" y2="96.2656"/><!--MD5=[01fce9a66e87cab5f2cb3faddae86ebe]
+class check_results--><rect fill="#FEFECE" filter="url(#f85ykeg129ttv)" height="124.1094" id="check_results" style="stroke: #A80036; stroke-width: 1.5;" width="94" x="358.5" y="8"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="77" x="367" y="25.457">check_results</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="359.5" x2="451.5" y1="33.0938" y2="33.0938"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="43" x="364.5" y="48.5127">check_id</text><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="13" x="410.5" y="48.5127">FK</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="42" x="364.5" y="62.3486">proxy_id</text><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="13" x="409.5" y="62.3486">FK</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="50" x="364.5" y="76.1846">test_url_id</text><text fill="#000000" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="13" x="417.5" y="76.1846">FK</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="48" x="364.5" y="90.0205">timestamp</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="82" x="364.5" y="103.8564">was_successful</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="50" x="364.5" y="117.6924">error_msg</text><line style="stroke: #A80036; stroke-width: 1.0;" x1="359.5" x2="451.5" y1="124.1094" y2="124.1094"/><!--MD5=[8f6f768e5890324c6fed72aa3a99f3b5]
+link fetch_runs to fetch_found--><path d="M99.1055,70 C110.843,70 122.581,70 134.319,70 " fill="none" id="fetch_runs-fetch_found" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="7" x="107.0911" y="66.2668">1</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="7" x="119.6395" y="66.1846">n</text><!--MD5=[0e2c377ac4598eac51ac94f687d2756f]
+link fetch_found to providers--><path d="M175.5,111.593 C175.5,136.627 175.5,168.3461 175.5,191.952 " fill="none" id="fetch_found-providers" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="7" x="167.9641" y="132.7395">n</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="7" x="167.8109" y="181.1282">1</text><!--MD5=[a4848f93a3fd18ff53a94442e5e215e2]
+link fetch_found to proxies--><path d="M216.625,70 C228.345,70 240.065,70 251.786,70 " fill="none" id="fetch_found-proxies" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="7" x="224.5738" y="66.1369">n</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="7" x="237.0657" y="65.9939">1</text><!--MD5=[161b6254671b4c52c3bbe73ab95555b6]
+link check_results to check_runs--><path d="M452.516,70 C464.161,70 475.807,70 487.453,70 " fill="none" id="check_results-check_runs" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="7" x="460.567" y="66.2394">n</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="7" x="472.2964" y="65.9055">1</text><!--MD5=[266388c3e3fc1050c48b7fbeb10627c7]
+link proxies to check_results--><path d="M323.453,70 C335.098,70 346.742,70 358.387,70 " fill="none" id="proxies-check_results" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="7" x="330.9737" y="66.0416">1</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="7" x="343.6369" y="66.2887">n</text><!--MD5=[57200dedb2a72bdee26680657bcf3395]
+link check_results to test_urls--><path d="M405.5,132.062 C405.5,152.474 405.5,174.4649 405.5,191.9818 " fill="none" id="check_results-test_urls" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="7" x="398.0953" y="153.672">n</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="7" x="397.8109" y="181.1638">1</text><!--MD5=[aa57442310e0220a90b3595d228d61c3]
+@startuml
+
+hide circle
+
+entity proxies {
+  proxy_id **PK**
+  ip
+  port
+  - -
+}
+
+entity providers {
+  provider_id **PK**
+  url
+  - -
+}
+
+entity fetch_runs {
+  fetch_id **PK**
+  date TIMESTAMP
+  - -
+}
+
+entity fetch_found {
+  fetch_id **FK**
+  provider_id **FK**
+  proxy_id **FK**
+  - -
+}
+
+fetch_runs "1" - "n" fetch_found
+fetch_found "n" - - "1" providers
+fetch_found "n" - "1" proxies
+
+entity test_urls {
+  test_url_id **PK**
+  url
+  - -
+}
+
+entity check_runs {
+  check_id **PK**
+  start_time
+  - -
+}
+
+entity check_results {
+  check_id **FK**
+  proxy_id **FK**
+  test_url_id **FK**
+  timestamp
+  was_successful
+  error_msg
+  - -
+}
+
+check_results "n" - "1" check_runs
+proxies "1" - "n" check_results
+check_results "n" - - "1" test_urls
+
+@enduml
+
+PlantUML version 1.2020.10(Sun May 17 11:35:57 CEST 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 11.0.7+10
+Operating System: Windows 10
+Default Encoding: Cp1252
+Language: en
+Country: US
+--></g></svg>

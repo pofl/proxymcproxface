@@ -1,0 +1,61 @@
+@startuml
+
+hide circle
+
+entity proxies {
+  proxy_id **PK**
+  ip
+  port
+  --
+}
+
+entity providers {
+  provider_id **PK**
+  url
+  --
+}
+
+entity fetch_runs {
+  fetch_id **PK**
+  date TIMESTAMP
+  --
+}
+
+entity fetch_found {
+  fetch_id **FK**
+  provider_id **FK**
+  proxy_id **FK**
+  --
+}
+
+fetch_runs "1" - "n" fetch_found
+fetch_found "n" -- "1" providers
+fetch_found "n" - "1" proxies
+
+entity test_urls {
+  test_url_id **PK**
+  url
+  --
+}
+
+entity check_runs {
+  check_id **PK**
+  start_time
+  --
+}
+
+entity check_results {
+  check_id **FK**
+  proxy_id **FK**
+  test_url_id **FK**
+  timestamp
+  was_successful
+  error_msg
+  --
+}
+
+check_results "n" - "1" check_runs
+proxies "1" - "n" check_results
+check_results "n" -- "1" test_urls
+
+@enduml
