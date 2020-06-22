@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -30,8 +31,12 @@ func TestMain(m *testing.M) {
 }
 
 func TestPostgresConnection(t *testing.T) {
-	require.NoError(t, connectDB())
-	require.NoError(t, db.Ping())
+	assert.NoError(t, connectDB())
+	connectionPossible := assert.NoError(t, db.Ping())
+	if !connectionPossible {
+		t.Fatal(
+			"These tests require a Postgres instance running on localhost. Run `docker-compose up`.")
+	}
 }
 
 func TestDBInit(t *testing.T) {
