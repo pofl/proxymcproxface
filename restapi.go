@@ -10,17 +10,17 @@ import (
 
 func ginit() *gin.Engine {
 	r := gin.Default()
-	r.GET("/proxies", proxyList)
-	r.GET("/providers", listProviderDetails)
-	r.PUT("/providers", setProviders)
-	r.POST("/fetch", triggerFetch)
-	r.POST("/check", triggerCheck)
-	r.POST("/clear", clearDB)
 	r.StaticFile("/", "index.html")
+	r.POST("/fetch", invokeFetch)
+	r.POST("/check", invokeCheck)
+	r.POST("/clear", invokeClearDB)
+	r.GET("/proxies", getProxies)
+	r.GET("/providers", getProviders)
+	r.PUT("/providers", putProviders)
 	return r
 }
 
-func proxyList(c *gin.Context) {
+func getProxies(c *gin.Context) {
 	list, err := getProxyList()
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -29,12 +29,12 @@ func proxyList(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-func triggerFetch(c *gin.Context) {
+func invokeFetch(c *gin.Context) {
 	fetchNow()
 	c.Status(http.StatusNoContent)
 }
 
-func triggerCheck(c *gin.Context) {
+func invokeCheck(c *gin.Context) {
 	limitStr := c.DefaultQuery("limit", "-1")
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
@@ -50,16 +50,16 @@ func triggerCheck(c *gin.Context) {
 	c.Status(http.StatusAccepted)
 }
 
-func clearDB(c *gin.Context) {
+func invokeClearDB(c *gin.Context) {
 	err := truncateTables()
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error(), nil)
 		return
 	}
-	c.String(http.StatusNoContent, "DB cleared", nil)
+	c.Status(http.StatusNoContent)
 }
 
-func listProviderDetails(c *gin.Context) {
+func getProviders(c *gin.Context) {
 	list, err := listProviders()
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -68,7 +68,7 @@ func listProviderDetails(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-func setProviders(c *gin.Context) {
+func putProviders(c *gin.Context) {
 	var list []string
 	if err := c.BindJSON(&list); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
