@@ -126,7 +126,7 @@ The following image shows the schema that might be chosen if engineering quality
 was a bigger concern. In that case the schema would have adhered at least to the
 third normal form and might therefore look similiar to this one:
 
-![The would-be 3NF schema](out/hypothetical3NF/hypothetical3NF.svg)
+![The would-be 3NF schema](hypothetical3NF.svg)
 
 With this schema every single required piece of information can be retrieved by
 medium-sophisticated SQL queries.
