@@ -1,0 +1,38 @@
+@startuml
+
+hide circle
+
+node Browser {
+  rectangle Frontend
+}
+
+node Backend {
+  artifact "main.go" as main
+  artifact "backend.go" as bego
+  artifact "restapi.go" as rest
+  rectangle "HTTP server" as server
+}
+
+node Database {
+  database Postgres
+}
+
+frame External  {
+  node Providers
+  node "Proxy servers" as proxies
+}
+
+main - bego : > initializes
+main - rest : > initializes
+rest -- bego : > calls
+
+Frontend -- server : > request
+server -- rest : > delegates\nrequest\nhandling
+' rest --- server : > initializes
+
+bego -- Postgres : > stores
+bego -- Providers : > fetches\nproxy\nservers
+bego -- proxies : > checks\nif work
+main -- Postgres : > initializes
+
+@enduml

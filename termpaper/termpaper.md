@@ -8,7 +8,7 @@ matriculation-number: 318051
 
 ## Overview
 
-![System overview chart](proxies-components.svg)
+![System overview chart](arch.svg)
 
 The backend is written in Go. There is no separate HTTP server like Apache httpd
 or Nginx. The Go framework that is used to expose a RESTful API registers the go
