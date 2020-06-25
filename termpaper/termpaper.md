@@ -73,10 +73,11 @@ user-provided list.
 This API design (PUT method) was chosen because the list of providers was
 thought of as a resource. While the correct method to retrieve the resource is
 obviously GET there is an argument to be made whether POST should be used
-instead of PUT. The author's understanding is that for idiomatic REST APIs
-POST is meant for requests that _create_ a resource or _invoke_ an operation. In
-this case the providers resource is _replaced_ by the body content of the
-request. This calls for PUT as the HTTP method.
+instead of PUT. The author's understanding is that for idiomatic REST APIs POST
+is meant for requests that _create_ a resource or _invoke_ an operation. In this
+case the providers resource is _replaced_ by the body content of the request.
+This calls for PUT as the HTTP method. See also
+https://restfulapi.net/rest-put-vs-post/
 
 ## Database & Schema
 
@@ -104,7 +105,7 @@ information:
     - number of records found on last update *
     - indication of an error that occurred during the last update *
 - The following information of all available test URLs can be displayed:
-    - test URL __TODO__
+    - test URL
     - details of functionality test validation *
     - the date of the last successful functionality test *
 
@@ -140,7 +141,7 @@ normalization rules would be to split the IP address up into four 8-bit integer
 values in order to achieve atomicity.
 
 It's interesting to note that this normalized schema looks a lot like a
-dimensional schema that would be found in data warehousing. *fetch_found* and
+dimensional schema that would be found in a data warehouse. *fetch_found* and
 *check_results* are basically fact tables and the other tables dimension tables.
 The only difference being that if one would follow the Kimball school of
 dimensional design, time would be a separate dimension.
@@ -166,12 +167,12 @@ CREATE TABLE checks (
 
 This is clearly inferior to the normalized schema discussed above. It results in
 much more data redundancy and storage space inefficiency. But it immensely
-simplifies the application code. The simplicity paradigm goes so far that there
-are no foreign keys or even primary keys are defined. This avoids any potential
-problems that might arise from referential integrity constraints. There are also
-no indexes. In a scenario where query speed is a concern the author would
-analyze critical queries and add indexes on columns that appear in `WHERE`
-clauses.
+simplifies the application code. Following the paradigm of simplicity here goes
+so far that there are no foreign keys or even primary keys are defined. This
+avoids any potential problems that might arise from referential integrity
+constraints. There are also no indexes. In a scenario where query speed is a
+concern the author would analyze critical queries and add indexes on columns
+that appear in `WHERE` clauses.
 
 The two most complex SQL queries that are run against the database are the
 queries that retrieve the data for the proxy detail information and the provider
@@ -213,19 +214,28 @@ GROUP BY provider_url;
 
 ## Frontend
 
-The frontend is a single HTML file with embedded JavaScript. For visual enhancement https://github.com/kognise/water.css is used as a stylesheet.
+The frontend is a single HTML file with embedded JavaScript. For visual
+enhancement https://github.com/kognise/water.css is used as a stylesheet.
 
-The page consists of a top bar containing buttons. These are the primary interactive elements of the web page. After first visiting the page this top bar is all that is visible.
+The page consists of a top bar containing buttons. These are the primary
+interactive elements of the web page. After first visiting the page this top bar
+is all that is visible.
 
 ![Interactive elements of the web page](nothing.png)
 
-Clicking on "Run fetch" invokes the backend to fetch proxy lists from the currently known providers immediately. "Run check" invokes the testing of all currently known proxy addresses to see if the currently given test URLs can be reached through each proxy. This process takes very long and is there fore run in the background.
+Clicking on "Run fetch" invokes the backend to fetch proxy lists from the
+currently known providers immediately. "Run check" invokes the testing of all
+currently known proxy addresses to see if the currently given test URLs can be
+reached through each proxy. This process takes very long and is there fore run
+in the background.
 
-Clicking on "See proxies" reveals a table displaying all currently known-to-work proxies and some details about them.
+Clicking on "See proxies" reveals a table displaying all currently known-to-work
+proxies and some details about them.
 
 ![The proxy list with details](proxy-details.png)
 
-Clicking on "See providers" reveals a table displaying all currently known providers as well as a timestamp when the providers was last fetched from.
+Clicking on "See providers" reveals a table displaying all currently known
+providers as well as a timestamp when the providers was last fetched from.
 
 ![The provider list with details](provider-details.png)
 
@@ -238,9 +248,11 @@ Clicking on "See providers" reveals a table displaying all currently known provi
     - This truncates all DB tables
     - Takes no query parameters or body content
     - Response `204 No Content` in case of success and empty body
-    - Response `500 Internal Server Error` in case something went wrong with a short error message in the body
+    - Response `500 Internal Server Error` in case something went wrong with a
+      short error message in the body
 - Endpoint `POST /fetch`
-    - This triggers the retrieval of proxy lists from all currently known providers
+    - This triggers the retrieval of proxy lists from all currently known
+      providers
     - Takes no query parameters or body content
     - Response `204 No Content`
     - No response body
@@ -252,7 +264,7 @@ Clicking on "See providers" reveals a table displaying all currently known provi
     - Response `202 Accepted` in case of success. 202 was chosen here because
       the check will be run asynchronously in the background. So although a
       response is sent right away the processing of it is actually not finished
-      in that moment.
+      at that moment.
     - No response body
 - Endpoint `GET /proxies`
     - Takes no query parameters or body content
@@ -269,7 +281,7 @@ Clicking on "See providers" reveals a table displaying all currently known provi
     - Response `500 Internal Server Error` in case something went wrong
       the request body
         - Body contains short error message
-- Endpoint `PUT /providers` __bugged__
+- Endpoint `PUT /providers`
     - Overwrite the internally kept list of providers with those provided in the
       request body
     - Takes no query parameters or body content
@@ -277,6 +289,7 @@ Clicking on "See providers" reveals a table displaying all currently known provi
         - Body is empty
     - Response `400 Bad Request` in case something is wrong with the content of
         - Body contains short error message
+- __TODO__ `/testurls`
 - All other endpoints will be rejected with either _404 Not Found_ or 
   _405 Method Not Allowed_.
 
