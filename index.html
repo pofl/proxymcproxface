@@ -4,7 +4,7 @@
     <title>Proxy McProxface</title>
   </head>
   <script>
-    function jsonToTable(headers, data) {
+    function jsonToTable(headers, keys, data) {
       let div = document.getElementById("content")
       while (div.childNodes.length > 0) div.removeChild(div.childNodes[0])
       let table = document.createElement("table")
@@ -22,9 +22,9 @@
       data.forEach((row) => {
         let tr = document.createElement("tr")
         table.appendChild(tr)
-        headers.forEach(header => {
+        keys.forEach(key => {
           let td = document.createElement("td")
-          td.appendChild(document.createTextNode(row[header]))
+          td.appendChild(document.createTextNode(row[key]))
           tr.appendChild(td)
         })
       })
@@ -46,14 +46,28 @@
     function proxyList() {
       let headers = ["Proxy", "LastSuccess", "LastSeen", "FirstSeen"]
       fetch('/proxies').then(resp => resp.json()).then(data => {
-        jsonToTable(headers, data)
+        jsonToTable(headers, headers, data)
       })
     }
     function providerList() {
       let headers = ["Provider", "LastFetch"]
       fetch('/providers').then(resp => resp.json()).then(data => {
-        jsonToTable(headers, data)
+        jsonToTable(headers, headers, data)
       })
+    }
+    function testUrlList() {
+      let headers = [
+        "Test URL",
+        "Proxy that can connect",
+        "Last successful connection attempt",
+        "Last successful attempt was most recent attempt"
+      ]
+      let keys = ["TestURL", "Proxy", "Timestamp", "IsMostRecentRun"]
+      fetch('/testurls')
+        .then(resp => resp.json())
+        .then(data => {
+          jsonToTable(headers, keys, data)
+        })
     }
   </script>
   <body>
@@ -63,7 +77,9 @@
       <button onclick="checkNow()">Run check</button>
       <button onclick="proxyList()">See proxies</button>
       <button onclick="providerList()">See providers</button>
+      <button onclick="testUrlList()">See test URLs</button>
     </fieldset>
     <div id="content"></div>
+    <p><font size=1>Timestamps from 1970 mean "never"</font></p>
   </body>
 </html>
