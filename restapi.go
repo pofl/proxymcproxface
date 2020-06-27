@@ -84,12 +84,12 @@ func putProviders(c *gin.Context) {
 }
 
 func getTestURLs(c *gin.Context) {
-	list := testURLs.list()
-	strList := []string{}
-	for _, url := range list {
-		strList = append(strList, url.String())
+	list, err := testURLList()
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
 	}
-	c.JSON(http.StatusOK, strList)
+	c.JSON(http.StatusOK, list)
 }
 
 func putTestURLs(c *gin.Context) {

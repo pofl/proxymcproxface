@@ -271,3 +271,35 @@ func listProviders() ([]ProviderDetails, error) {
 	}
 	return list, nil
 }
+
+type TestURLCheckResult struct {
+	TestURL         string
+	Proxy           string
+	Timestamp       time.Time
+	IsMostRecentRun bool
+}
+
+func testURLList() ([]TestURLCheckResult, error) {
+	list := []TestURLCheckResult{}
+	currentTestURLs := testURLs.list()
+	for _, testURL := range currentTestURLs {
+		var details TestURLCheckResult
+		query, err := ioutil.ReadFile("sql/query_test_url_details.sql")
+		if err != nil {
+			return nil, err
+		}
+		row := db.QueryRow(string(query), testURL.String())
+		err = row.Scan(&details.TestURL, &details.Proxy, &details.Timestamp, &details.IsMostRecentRun)
+		if err != nil {
+			if strings.Contains(err.Error(), "no rows") {
+				// this error is expected
+				details = TestURLCheckResult{testURL.String(), "-", time.Unix(0, 0), false}
+			} else {
+				// any other error is not expected so make it very visible if it ever occurs
+				log.Fatal(err)
+			}
+		}
+		list = append(list, details)
+	}
+	return list, nil
+}

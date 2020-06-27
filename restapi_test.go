@@ -140,8 +140,10 @@ func TestTestURLEndpoints(t *testing.T) {
 	require.Equal(t, http.StatusNoContent, putRR.Result().StatusCode)
 	server.ServeHTTP(getRR, getReq)
 
-	var respURLs []string
+	var respURLs []TestURLCheckResult
 	err = json.Unmarshal(getRR.Body.Bytes(), &respURLs)
 	require.NoError(t, err)
-	require.ElementsMatch(t, urls, respURLs)
+	for _, u := range respURLs {
+		require.Contains(t, urls, u.TestURL)
+	}
 }
