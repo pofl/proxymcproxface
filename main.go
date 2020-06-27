@@ -90,3 +90,19 @@ func truncateTables() error {
 	_, err := db.Exec("TRUNCATE TABLE checks")
 	return err
 }
+
+var testURLs UrlList
+var providers UrlList
+
+func init() {
+	providers = UrlList{[]*url.URL{}}
+	providers.overwrite([]string{
+		"https://www.proxy-list.download/api/v1/get?type=http",
+		"https://api.proxyscrape.com/?request=displayproxies&proxytype=http",
+	})
+
+	testURLs = UrlList{[]*url.URL{}}
+	testURLs.overwrite([]string{
+		"https://motherfuckingwebsite.com/",
+	})
+}

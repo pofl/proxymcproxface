@@ -11,22 +11,6 @@ import (
 	"time"
 )
 
-var testURLs UrlList
-var providers UrlList
-
-func init() {
-	providers = UrlList{[]*url.URL{}}
-	providers.overwrite([]string{
-		"https://www.proxy-list.download/api/v1/get?type=http",
-		"https://api.proxyscrape.com/?request=displayproxies&proxytype=http",
-	})
-
-	testURLs = UrlList{[]*url.URL{}}
-	testURLs.overwrite([]string{
-		"https://motherfuckingwebsite.com/",
-	})
-}
-
 type CheckResult struct {
 	proxy         net.Addr
 	testURL       *url.URL
