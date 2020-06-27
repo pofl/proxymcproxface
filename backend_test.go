@@ -21,8 +21,8 @@ func TestMain(m *testing.M) {
 	proxy1, _ := net.ResolveTCPAddr("tcp4", "1.2.3.4:5")
 	proxy2, _ := net.ResolveTCPAddr("tcp4", "5.6.7.8:9")
 	testURL, _ := url.Parse("https://motherfuckingwebsite.com/")
-	exampleCheckRes1 = CheckResult{proxy1, testURL, time.Now(), true, 0, ""}
-	exampleCheckRes2 = CheckResult{proxy2, testURL, time.Now(), true, 0, ""}
+	exampleCheckRes1 = CheckResult{proxy1, testURL, time.Now(), time.Now(), true, 0, ""}
+	exampleCheckRes2 = CheckResult{proxy2, testURL, time.Now(), time.Now(), true, 0, ""}
 	exampleFetchRes1 = FetchResult{testURL, proxy1, time.Now()}
 	exampleFetchRes2 = FetchResult{testURL, proxy2, time.Now()}
 

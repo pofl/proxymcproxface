@@ -28,18 +28,22 @@ func init() {
 }
 
 type CheckResult struct {
-	proxy      net.Addr
-	testURL    *url.URL
-	ts         time.Time
-	worked     bool
-	statusCode int
-	errorMsg   string
+	proxy         net.Addr
+	testURL       *url.URL
+	checkRunStart time.Time
+	thisCheckTS   time.Time
+	worked        bool
+	statusCode    int
+	errorMsg      string
 }
 
 // limit < 0 means go all the way
 func checkAll(limit int) error {
+	checkRunStart := time.Now()
+
 	checkOne := func(proxy net.Addr, testURL *url.URL) {
 		checkRes := checkProxy(proxy, testURL)
+		checkRes.checkRunStart = checkRunStart
 		_ = saveCheckToDB(checkRes) // just drop it if it can't be saved
 	}
 
@@ -63,7 +67,7 @@ func checkAll(limit int) error {
 }
 
 func checkProxy(proxy net.Addr, testURL *url.URL) CheckResult {
-	res := CheckResult{proxy, testURL, time.Now(), false, 0, ""}
+	res := CheckResult{proxy, testURL, time.Now(), time.Now(), false, 0, ""}
 	proxyURL, err := url.Parse("http://" + proxy.String())
 	if err != nil {
 		res.errorMsg = err.Error()
@@ -96,14 +100,16 @@ func checkProxy(proxy net.Addr, testURL *url.URL) CheckResult {
 
 func saveCheckToDB(res CheckResult) error {
 	insertStmt :=
-		"INSERT INTO checks VALUES ($1, $2, $3, $4, $5, $6)"
+		"INSERT INTO checks VALUES ($1, $2, $3, $4, $5, $6, $7)"
 	log.Printf(
-		"%v | %v | %v | %v | %v | %v",
-		res.proxy.String(), res.testURL.String(), res.ts, res.worked, res.statusCode, res.errorMsg,
+		"%v | %v | %v | %v | %v | %v | %v",
+		res.proxy.String(), res.testURL.String(), res.checkRunStart, res.thisCheckTS,
+		res.worked, res.statusCode, res.errorMsg,
 	)
 	_, err := db.Exec(
 		insertStmt,
-		res.proxy.String(), res.testURL.String(), res.ts, res.worked, res.statusCode, res.errorMsg,
+		res.proxy.String(), res.testURL.String(), res.checkRunStart, res.thisCheckTS,
+		res.worked, res.statusCode, res.errorMsg,
 	)
 	return err
 }

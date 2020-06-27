@@ -1,7 +1,7 @@
 WITH check_stats AS (
     SELECT
         proxy,
-        MAX(ts) AS last_success
+        MAX(this_proxy_check_start) AS last_success
     FROM checks
     WHERE success = true
     GROUP BY proxy
