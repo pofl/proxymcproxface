@@ -20,8 +20,12 @@ stores its data in a PostgreSQL database.
 ## Running the application
 
 The easiest way to run the application is starting it via `docker-compose up`.
-This requires that docker and docker-compose is installed on the system. This
-command
+This requires that docker and docker-compose is installed on the system. When
+running this command the first time, it could be that it doesn't work because
+the bootstrapping of the PostgreSQL database might not be finished when the
+application tries to connect to it. Letting the bootstrap run through and then
+stopping the docker-compose program and re-executing the same command should
+work. This command
 
 - creates a container running PostgreSQL
 - creates a container running pgAdmin (this is very helpful during debugging)
