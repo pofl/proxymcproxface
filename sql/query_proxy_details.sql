@@ -1,24 +1,24 @@
-WITH check_stats AS (
-    SELECT
+with check_stats as (
+    select
         proxy,
-        MAX(this_proxy_check_start) AS last_success
-    FROM checks
-    WHERE success = true
-    GROUP BY proxy
+        max(this_proxy_check_start) as last_success
+    from checks
+    where success = true
+    group by proxy
 ),
-fetch_stats AS (
-    SELECT
+fetch_stats as (
+    select
         proxy,
-        MAX(ts) AS last_seen,
-        MIN(ts) AS first_seen
-    FROM fetch_runs
-    GROUP BY proxy
+        max(ts) as last_seen,
+        min(ts) as first_seen
+    from fetch_runs
+    group by proxy
 )
-SELECT
-    c.proxy AS proxy, -- IP address, port number
-    c.last_success AS last_success, -- date of the last successful basic functionality test
-    f.last_seen AS last_seen, -- date when the address was last found in any proxy list
-    f.first_seen AS first_seen -- date when the address was first found in any proxy list
-FROM check_stats AS c
-JOIN fetch_stats AS f
-ON c.proxy = f.proxy
+select
+    c.proxy as proxy,
+    c.last_success as last_success,
+    f.last_seen as last_seen,
+    f.first_seen as first_seen
+from check_stats as c
+join fetch_stats as f
+on c.proxy = f.proxy
