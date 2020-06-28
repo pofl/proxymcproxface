@@ -22,7 +22,7 @@ func main() {
 		log.Fatal(err)
 	}
 	router := newServer()
-	router.Run(":5000")
+	router.Run("127.0.0.1:5000")
 }
 
 func connectDB() error {
