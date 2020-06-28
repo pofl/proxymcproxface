@@ -17,6 +17,28 @@ HTML file is served under the `/` route. It contains some JavaScript that sends
 HTTP requests to the backend via the asynchronous `fetch` API. The backend
 stores its data in a PostgreSQL database.
 
+## Running the application
+
+The easiest way to run the application is starting it via `docker-compose up`.
+This requires that docker and docker-compose is installed on the system. This
+command
+
+- creates a container running PostgreSQL
+- creates a container running pgAdmin (this is very helpful during debugging)
+- creates a container running the application
+
+To develop/test the application it is advised to run
+`docker-compose up postgres` to start only the postgres container from the
+docker-compose file. Then the application should be able to connect to it
+automatically and the code can be run and tested as one likes.
+
+If it is desired to run the application with a PostgreSQL instance other than
+via Docker, it is necessary to set some environment variables so that the
+application knows how to connect to the database. This can be looked up in the
+main.go file.
+
+Whichever way to start the application is used, it can then be reached under the address http://127.0.0.1
+
 ## Terminology
 
 In this document there are some terms that have a specific meaning in the

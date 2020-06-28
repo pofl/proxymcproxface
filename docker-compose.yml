@@ -6,9 +6,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER:
       POSTGRES_PASSWORD: "test"
-      POSTGRES_DB:
+    volumes:
+      - ./data/postgres/data:/var/lib/postgresql/data
 
   pgadmin:
     image: dpage/pgadmin4
@@ -20,6 +20,19 @@ services:
       PGADMIN_DEFAULT_PASSWORD: pw
     volumes:
       - ./data/pgadmin/data:/var/lib/pgadmin
-    restart: unless-stopped
     depends_on:
       - postgres
+
+  app:
+    image: golang
+    working_dir: /app/
+    volumes:
+      - .:/app
+      - ${GOPATH:-./data/gopath}:/go
+    command: go run .
+    ports:
+      - "80:80"
+    environment:
+      POSTGRES_PASSWORD: "test"
+      POSTGRES_HOST: postgres
+      SERVER_ADDRESS: ":80"

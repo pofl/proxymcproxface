@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/url"
+	"os"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
@@ -22,11 +23,39 @@ func main() {
 		log.Fatal(err)
 	}
 	router := newServer()
-	router.Run("127.0.0.1:5000")
+	addr := os.Getenv("SERVER_ADDRESS")
+	if addr == "" {
+		addr = "127.0.0.1:80"
+	}
+	router.Run(addr)
 }
 
 func connectDB() error {
-	client, err := sql.Open("pgx", "user=postgres password=test host=localhost")
+	host := os.Getenv("POSTGRES_HOST")
+	if host == "" {
+		host = "localhost"
+	}
+	user := os.Getenv("POSTGRES_USER")
+	if user == "" {
+		user = "postgres"
+	}
+	password := os.Getenv("POSTGRES_PASSWORD")
+	if password == "" {
+		password = "test"
+	}
+	port := os.Getenv("POSTGRES_PORT")
+	if port == "" {
+		port = "5432"
+	}
+	database := os.Getenv("POSTGRES_DB")
+	if database == "" {
+		database = "postgres"
+	}
+	connStr := fmt.Sprintf(
+		"user=%s password=%s host=%s port=%s database=%s",
+		user, password, host, port, database,
+	)
+	client, err := sql.Open("pgx", connStr)
 	db = client
 	return err
 }
