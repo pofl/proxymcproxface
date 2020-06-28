@@ -50,9 +50,10 @@
       })
     }
     function providerList() {
-      let headers = ["Provider", "LastFetch"]
+      let keys = ["Provider", "LastFetch", "LastFound"]
+      let headers = ["Provider", "Last fetch", "# proxies found during last fetch"]
       fetch('/providers').then(resp => resp.json()).then(data => {
-        jsonToTable(headers, headers, data)
+        jsonToTable(headers, keys, data)
       })
     }
     function testUrlList() {

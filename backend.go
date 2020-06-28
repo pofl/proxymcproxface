@@ -125,10 +125,13 @@ func fetchProxiesFromProvider(prov *url.URL) ([]FetchResult, error) {
 	if err != nil {
 		return nil, err
 	}
+	ts := time.Now()
 	for _, proxy := range proxies {
 		addr, err := net.ResolveTCPAddr("tcp4", proxy)
 		if err == nil {
-			fetch := FetchResult{prov, addr, time.Now()}
+			// For one and the same fetch run the timestamp should be consistent for all discovered
+			// proxies. This is the only thing that identifies the concept of a run.
+			fetch := FetchResult{prov, addr, ts}
 			res = append(res, fetch)
 		}
 	}
@@ -229,6 +232,7 @@ func getProxyList() ([]ProxyListItem, error) {
 type ProviderDetails struct {
 	Provider  string
 	LastFetch time.Time
+	LastFound int
 }
 
 func listProviders() ([]ProviderDetails, error) {
@@ -241,11 +245,11 @@ func listProviders() ([]ProviderDetails, error) {
 			return nil, err
 		}
 		row := db.QueryRow(string(query), provider.String())
-		err = row.Scan(&details.Provider, &details.LastFetch)
+		err = row.Scan(&details.Provider, &details.LastFetch, &details.LastFound)
 		if err != nil {
 			if strings.Contains(err.Error(), "no rows") {
 				// this error is expected
-				details = ProviderDetails{provider.String(), time.Unix(0, 0)}
+				details = ProviderDetails{provider.String(), time.Unix(0, 0), 0}
 			} else {
 				// any other error is not expected so make it very visible if it ever occurs
 				log.Fatal(err)
