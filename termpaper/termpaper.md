@@ -67,7 +67,7 @@ The service exposes a very simple API to manage the providers it knows. The
 route is "/providers". A GET request to this route will be answered with a
 JSON-formatted list of the currently known provider URLs. In the body of a PUT
 request to this endpoint the user can provide a list of provider URLs. The list
-of known providers that the backend keeps will completely replaced by this
+of known providers that the backend keeps will be completely replaced by this
 user-provided list.
 
 This API design (PUT method) was chosen because the list of providers was
@@ -76,7 +76,7 @@ obviously GET there is an argument to be made whether POST should be used
 instead of PUT. The author's understanding is that for idiomatic REST APIs POST
 is meant for requests that _create_ a resource or _invoke_ an operation. In this
 case the providers resource is _replaced_ by the body content of the request.
-This calls for PUT as the HTTP method. See also
+This calls for PUT as the HTTP method. See 
 https://restfulapi.net/rest-put-vs-post/
 
 ## Database & Schema
@@ -84,32 +84,6 @@ https://restfulapi.net/rest-put-vs-post/
 PostgreSQL is used for data storage. PostgreSQL (hereafter referred to as
 Postgres) is a relational database management system. The code connects to it by
 means of a library which implements the Postgres wire protocol.
-
-The data that needs to be stored - and consequently the database schema - is
-determined by the requirements stated in the task description. As specified in
-the task description the application should be able to display the following
-information:
-
-- The following detail information of all collected HTTP(S) proxies can be
-  displayed:
-    - IP address
-    - port number
-    - date of the last successful basic functionality test
-    - date when the address was last found in any proxy list
-    - date when the address was first found in any proxy list
-- The following information can be displayed for each proxy list provider:
-    - base address (URL) of the proxy list
-    - details on extracting the HTTP(S) proxy addresses from the list *
-    - date of the last successful update of the proxy list
-    - date of the last attempt to update
-    - number of records found on last update *
-    - indication of an error that occurred during the last update *
-- The following information of all available test URLs can be displayed:
-    - test URL
-    - details of functionality test validation *
-    - the date of the last successful functionality test *
-
-__*__ These requirements are not fulfilled by the code
 
 In a real software project, a diligent software developer would use the third
 normal form to design the database schema. In a real software project it would
@@ -150,15 +124,16 @@ The schema used in the author's implementation is much simpler and looks like
 the following:
 
 ```sql
-CREATE TABLE fetch_runs (
+CREATE TABLE IF NOT EXISTS fetch_runs (
     provider_url TEXT,
     proxy TEXT,
     ts TIMESTAMP
 );
-CREATE TABLE checks (
+CREATE TABLE IF NOT EXISTS checks (
     proxy TEXT,
     test_url TEXT,
-    ts TIMESTAMP NOT NULL,
+    check_start TIMESTAMP NOT NULL,
+    this_proxy_check_start TIMESTAMP NOT NULL,
     success BOOLEAN NOT NULL,
     status_code INTEGER,
     error_msg TEXT
@@ -168,48 +143,88 @@ CREATE TABLE checks (
 This is clearly inferior to the normalized schema discussed above. It results in
 much more data redundancy and storage space inefficiency. But it immensely
 simplifies the application code. Following the paradigm of simplicity here goes
-so far that there are no foreign keys or even primary keys are defined. This
-avoids any potential problems that might arise from referential integrity
+so far that there are no foreign keys or even primary keys defined. This avoids
+any potential complications that might arise from referential integrity
 constraints. There are also no indexes. In a scenario where query speed is a
 concern the author would analyze critical queries and add indexes on columns
 that appear in `WHERE` clauses.
 
-The two most complex SQL queries that are run against the database are the
-queries that retrieve the data for the proxy detail information and the provider
-detail information. They show how most of the required information can be
-retrieved from the schema shown above.
+Another significant reason for why the schema can be this simple is the fact
+that the tables will be used in an append-only fashion. One of the advantages of
+and reasons for applying normalization is that the risk of introducing data
+inconsistencies during updates is reduced. That is not a concern in this
+application
+
+The more complex SQL queries that are run against the database are the queries
+that retrieve the data for the various detail lists that the is required to be
+able to show. They show how most of the required information can be retrieved
+from the schema shown above.
 
 ```sql
-WITH check_stats AS (
-  SELECT
-    proxy,
-    MAX(ts) AS last_success
-  FROM checks
-  WHERE success = true
-  GROUP BY proxy
+-- query to receive proxy details
+with check_stats as (
+    select
+        proxy,
+        max(this_proxy_check_start) as last_success
+    from checks
+    where success = true
+    group by proxy
 ),
-fetch_stats AS (
-  SELECT
-    proxy,
-    MAX(ts) AS last_seen,
-    MIN(ts) AS first_seen
-  FROM fetch_runs
-  GROUP BY proxy
+fetch_stats as (
+    select
+        proxy,
+        max(ts) as last_seen,
+        min(ts) as first_seen
+    from fetch_runs
+    group by proxy
 )
-SELECT
-  c.proxy AS proxy,
-  c.last_success AS last_success,
-  f.last_seen AS last_seen,
-  f.first_seen AS first_seen
-FROM check_stats AS c
-JOIN fetch_stats AS f
-ON c.proxy = f.proxy
+select
+    c.proxy as proxy,
+    c.last_success as last_success,
+    f.last_seen as last_seen,
+    f.first_seen as first_seen
+from check_stats as c
+join fetch_stats as f
+on c.proxy = f.proxy
 
-SELECT
-  provider_url,
-  MAX(ts) AS last_update
-FROM fetch_runs
-GROUP BY provider_url;
+-- query to retrieve details for a given provider ($1)
+with count_by_run as (
+    select
+        provider_url,
+		ts,
+        max(ts) over (partition by provider_url) as latest_fetch,
+        count(*) as found
+    from fetch_runs
+    group by provider_url, ts
+)
+select
+    provider_url,
+    latest_fetch,
+    found
+from count_by_run
+where latest_fetch = ts and provider_url = $1
+
+-- query to retrieve details for a given test URL ($1)
+with pre as (
+    select
+        test_url,
+        proxy,
+        success,
+        this_proxy_check_start,
+	    check_start,
+        max(check_start) over (partition by test_url) as most_recent_run
+    from checks
+)
+select
+    test_url,
+    proxy,
+    this_proxy_check_start as last_success,
+    check_start = most_recent_run AS is_most_recent_run
+from pre
+where success is true
+    and test_url = $1
+order by this_proxy_check_start desc
+limit 1
 ```
 
 ## Frontend
@@ -235,9 +250,16 @@ proxies and some details about them.
 ![The proxy list with details](proxy-details.png)
 
 Clicking on "See providers" reveals a table displaying all currently known
-providers as well as a timestamp when the providers was last fetched from.
+providers as well as a timestamp when the providers was last fetched from and
+how many proxies were returned during that fetch.
 
 ![The provider list with details](provider-details.png)
+
+Clicking on "See test URLs" reveals a table displaying all currently know test
+URLs as well as the proxider that was most recently found to be able to connect
+to the URL.
+
+![The test URL list with details](testurl-details.png)
 
 ## REST API
 
@@ -284,12 +306,27 @@ providers as well as a timestamp when the providers was last fetched from.
 - Endpoint `PUT /providers`
     - Overwrite the internally kept list of providers with those provided in the
       request body
-    - Takes no query parameters or body content
     - Response `204 No Content` in case of success
         - Body is empty
     - Response `400 Bad Request` in case something is wrong with the content of
+      the body
         - Body contains short error message
-- __TODO__ `/testurls`
+- Endpoint `GET /testurls`
+    - Takes no query parameters or body content
+    - Response `200 OK` in case of success
+        - Body contains a JSON encoded list of test URLs plus some
+          additional info for each
+    - Response `500 Internal Server Error` in case something went wrong
+      the request body
+        - Body contains short error message
+- Endpoint `PUT /providers`
+    - Overwrite the internally kept list of test URLs with those provided in the
+      request body
+    - Response `204 No Content` in case of success
+        - Body is empty
+    - Response `400 Bad Request` in case something is wrong with the content of
+      the body
+        - Body contains short error message
 - All other endpoints will be rejected with either _404 Not Found_ or 
   _405 Method Not Allowed_.
 
@@ -332,4 +369,14 @@ Content-Type: application/json
 Content-Length: 56
 
 ["https://motherfuckingwebsite.com/", "http://txti.es/"]
+```
+
+Example response for `GET /testurls`:
+```
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Sun, 28 Jun 2020 06:18:16 GMT
+Content-Length: 146
+
+[{"TestURL":"https://motherfuckingwebsite.com/","Proxy":"203.110.164.139:52144","Timestamp":"2020-06-28T18:29:35.143747Z","IsMostRecentRun":true}]
 ```
