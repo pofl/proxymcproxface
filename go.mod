@@ -1,6 +1,6 @@
 module github.com/pofl/proxy-assignment
 
-go 1.14
+go 1.18
 
 require (
 	github.com/gin-gonic/gin v1.7.7
